@@ -1,4 +1,10 @@
-# WhatsApp Tracker 3.4.0 testing
+# WhatsApp Tracker 3.4.1 testing
+
+## Form isolation regression
+
+Run `wp eval-file tests/notice-form-integration.php` on a disposable WordPress installation with this plugin active. The checks restore the affected hooks after execution and cover callback ownership, exact-file/directory boundaries, unrelated-hook removal, core printer retention and early asset queue filtering without unregistering dependencies.
+
+Local browser regression uses a separate test plugin that injects head content, footer widgets and both early and enqueue-hook chat scripts. The form frame excludes those while the parent page retains them. Basic WPForms Lite AJAX submission is tested separately; live CAPTCHA, payment flows, every third-party provider and physical-device behavior are not certified by this regression.
 
 ## Completed for this release
 
@@ -18,11 +24,11 @@ The PHP files under tests use the WordPress core test library and PHPUnit; set W
 ## Required site-specific staging checks
 
 1. Upgrade without uninstalling and verify existing rules, routes and analytics.
-2. Purge page/CDN caches. Check the page uses frontend-tracker-3.4.0.js and frontend-3.4.0.css.
+2. Purge page/CDN caches. Check the page uses frontend-tracker-3.4.1.js and frontend-3.4.1.css; the form uses notice-form-3.4.1.css.
 3. On physical iOS and Android, test affected and unaffected telephone/WhatsApp links. Test both popup master switches.
 4. With actual Polylang configured, verify each language-specific rule and Default fallback after page-language switching. Language matching has regression coverage; a full Polylang installation was not exercised here.
 5. Test your real shortcode provider, CAPTCHA, validation, privacy consent, confirmation/redirect, mail delivery and any payments in that provider's test mode. Basic WPForms Lite success does not certify all forms.
 6. Verify forms are not cached. Test closing and Back with unsent input, keyboard navigation, and screen-reader interaction.
 7. Run existing scanner/migration workflows on disposable staging data; this release does not re-certify every legacy admin workflow.
 
-No physical-device or production deployment tests were performed for 3.4.0.
+No physical-device or production deployment tests were performed for 3.4.1.

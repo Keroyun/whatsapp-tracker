@@ -1,6 +1,7 @@
 (function () {
 	'use strict';
 	// Release-specific filename: remains cache-safe when query strings are removed.
+	// Shortcode documents isolate form-provider assets from sitewide widgets.
 
 	var configNode = document.getElementById('awm-tracker-config');
 	var cfg = {};

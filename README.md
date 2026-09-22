@@ -2,7 +2,7 @@
 
 A WordPress plugin for managing WhatsApp contact links, measuring link engagement, and displaying configurable service notices for WhatsApp and telephone links.
 
-**Version:** 3.4.0 · **Author:** [Azhar](https://github.com/Keroyun) · **Website:** [khairulazhar.com](https://khairulazhar.com) · **License:** GPL-2.0-or-later
+**Version:** 3.4.1 · **Author:** [Azhar](https://github.com/Keroyun) · **Website:** [khairulazhar.com](https://khairulazhar.com) · **License:** GPL-2.0-or-later
 
 This is a website contact-link tool. It does not connect to a WhatsApp account, read chats, monitor conversations, or access private messages.
 
@@ -75,7 +75,9 @@ Telephone calls use `tel:`; WhatsApp uses a WhatsApp URL. Country codes are not 
 
 Tick **Show a third action button**, set its label and choose a URL/telephone action or a shortcode such as `[wpforms id="123"]` from an installed form provider. The X remains available to close the popup; Back returns from the form to the notice. Closing or returning discards unfinished form input.
 
-Forms render in a same-origin embedded document with WordPress head/footer hooks. The form provider owns validation, storage, email and consent. Test CAPTCHA, confirmation redirects and other provider-specific behavior. For a page-dependent form, use its normal page URL instead. Never embed private/admin-only content in this public popup.
+Forms render in a same-origin, form-only document. Only the shortcode provider's head/footer/enqueue callbacks and WordPress asset printers run there; unrelated site chat widgets, popups, theme chrome and sticky footers are excluded. This is request-local: the parent website retains its normal widgets. Form styles and scripts, including registered dependencies, are retained without hiding arbitrary iframes or CAPTCHA elements.
+
+The form provider owns validation, storage, email and consent. Test CAPTCHA, confirmation redirects and other provider-specific behavior. Theme styling and separate add-on plugins are not automatically included; developers can explicitly opt in the needed provider directory/file using the `awm_notice_form_provider_roots` filter. A shortcode registered in a theme/custom file retains callbacks from that file only. For a page-dependent form, use its normal page URL instead. Never embed private/admin-only content in this public popup. Provider-emitted content is trusted, so this separation is not a security sandbox and cannot remove a widget intentionally emitted by the form provider itself.
 
 ### Languages
 

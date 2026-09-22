@@ -2,7 +2,7 @@
 /**
  * Plugin Name: WhatsApp Tracker
  * Description: Central WhatsApp routes, safe bulk migration, WhatsApp and telephone service notices, click analytics, source attribution, link inventory scanning, wa.link resolution and approved-number governance.
- * Version: 3.4.0
+ * Version: 3.4.1
  * Author: Azhar
  * Author URI: https://github.com/Keroyun
  * Plugin URI: https://khairulazhar.com
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'AWM_VERSION', '3.4.0' );
+define( 'AWM_VERSION', '3.4.1' );
 define( 'AWM_DB_VERSION', '3.2.0' );
 define( 'AWM_MENU_SLUG', 'awm-dashboard' );
 define( 'AWM_PLUGIN_FILE', __FILE__ );
