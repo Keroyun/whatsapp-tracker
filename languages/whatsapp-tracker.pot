@@ -1,0 +1,215 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: WhatsApp Tracker 3.4.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"MIME-Version: 1.0\n"
+"X-Domain: whatsapp-tracker\n"
+
+msgid "A matching page-language rule wins over Default / All languages. Within the same language scope, the most specific match wins; priority breaks ties. Popup wording is entered by you, not automatically translated."
+msgstr ""
+
+msgid "A selected Polylang language is always required, even with Match any. Rules with a language restriction do not run when the page language cannot be determined."
+msgstr ""
+
+msgid "Actions"
+msgstr ""
+
+msgid "Add Telephone Notice"
+msgstr ""
+
+msgid "Add WhatsApp Notice"
+msgstr ""
+
+msgid "Cancel Editing"
+msgstr ""
+
+msgid "Channel"
+msgstr ""
+
+msgid "Configured Popup Rules"
+msgstr ""
+
+msgid "Contact Numbers / Destinations"
+msgstr ""
+
+msgid "Default / All languages"
+msgstr ""
+
+msgid "Delete"
+msgstr ""
+
+msgid "Edit"
+msgstr ""
+
+msgid "Emergency Popups"
+msgstr ""
+
+msgid "Enable this emergency popup"
+msgstr ""
+
+msgid "Exact Contact Links"
+msgstr ""
+
+msgid "Existing rules remain WhatsApp only. Short telephone service numbers are never intercepted. Add data-awm-emergency-exempt=\"1\" to any emergency-service link that must always open normally."
+msgstr ""
+
+msgid "For example: Service notice."
+msgstr ""
+
+msgid "Form Back Button"
+msgstr ""
+
+msgid "Form Shortcode"
+msgstr ""
+
+msgid "Going back or closing discards an unfinished form."
+msgstr ""
+
+msgid "If your website uses multiple languages, create separate rules for each translation and select its Language above. For legacy path-based rules, use Match all to require both the selected pages and the number. Existing match settings are preserved."
+msgstr ""
+
+msgid "Internal name, for example: WhatsApp Outage — Main Contact."
+msgstr ""
+
+msgid "Language"
+msgstr ""
+
+msgid "Match"
+msgstr ""
+
+msgid "Match Logic"
+msgstr ""
+
+msgid "Match all populated target groups"
+msgstr ""
+
+msgid "Match any configured target"
+msgstr ""
+
+msgid "Message"
+msgstr ""
+
+msgid "Off by default. The X always remains available to close the popup."
+msgstr ""
+
+msgid "Open Tawk.to Live Chat"
+msgstr ""
+
+msgid "Open a URL"
+msgstr ""
+
+msgid "Open a link or call a number"
+msgstr ""
+
+msgid "Open a shortcode form inside the popup"
+msgstr ""
+
+msgid "Optional Third Button"
+msgstr ""
+
+msgid "Optional: one full WhatsApp or tel: link per line. Exact telephone links retain the leading + distinction. For ordinary number targeting, use Contact Numbers / Destinations and leave this field empty. With Match all, every populated target group must match."
+msgstr ""
+
+msgid "Page Paths"
+msgstr ""
+
+msgid "Popup Content"
+msgstr ""
+
+msgid "Popup Visibility"
+msgstr ""
+
+msgid "Primary / Tawk Fallback URL"
+msgstr ""
+
+msgid "Primary Action"
+msgstr ""
+
+msgid "Primary Button"
+msgstr ""
+
+msgid "Priority"
+msgstr ""
+
+msgid "Review scope:"
+msgstr ""
+
+msgid "Rule"
+msgstr ""
+
+msgid "Rule Name"
+msgstr ""
+
+msgid "Rule Status"
+msgstr ""
+
+msgid "Secondary Button"
+msgstr ""
+
+msgid "Secondary URL"
+msgstr ""
+
+msgid "Show a third action button"
+msgstr ""
+
+msgid "Show popups for matching WhatsApp links"
+msgstr ""
+
+msgid "Show popups for matching telephone links"
+msgstr ""
+
+msgid "Small Heading"
+msgstr ""
+
+msgid "Status"
+msgstr ""
+
+msgid "Targets"
+msgstr ""
+
+msgid "Temporarily intercept selected WhatsApp or telephone links and direct visitors to Live Chat or another official channel. Rules work across existing pages without changing their stored URLs. Settings refresh on page load and every 60 seconds while the page is visible. Exclude the emergency-rules REST endpoint from CDN caching."
+msgstr ""
+
+msgid "Test the targets and alternative contact links before enabling the rule on production."
+msgstr ""
+
+msgid "Third Button Action"
+msgstr ""
+
+msgid "Third Button Label"
+msgstr ""
+
+msgid "Third Button URL"
+msgstr ""
+
+msgid "This notice blocks the original telephone link and offers your configured alternatives. Enter the affected telephone number, set a working alternative URL, and enable the rule after testing. To target the number sitewide, leave Page Paths and Exact Contact Links empty."
+msgstr ""
+
+msgid "Title"
+msgstr ""
+
+msgid "Unticking a channel leaves all its rules saved but allows its links to open normally on desktop and mobile. Individual rules must also be enabled below."
+msgstr ""
+
+msgid "Use a shortcode from an installed form plugin. This form is public. It opens in a same-site embedded document, with the form plugin responsible for submissions and validation. Test its scripts, CAPTCHA and confirmation behaviour before publishing. Page-specific or theme-dependent shortcodes may need a normal form-page URL instead. Exclude awm_notice_form requests from CDN caching."
+msgstr ""
+
+msgid "Use https://, http://, or tel: followed by a full contact number. For Tawk.to, visitors are sent here if the widget is unavailable. Provide a fallback URL."
+msgstr ""
+
+msgid "Use tel: for a phone call, a WhatsApp link for WhatsApp, or an https:// page address."
+msgstr ""
+
+msgid "Use “all” to target a particular number or exact link only when it is clicked on selected pages."
+msgstr ""
+
+msgid "Used only when two matching rules are equally specific. Higher priority wins."
+msgstr ""
+
+msgid "X Accessible Label"
+msgstr ""
+msgid "and match separately."
+msgstr ""
+
+msgid "for the whole website."
+msgstr ""

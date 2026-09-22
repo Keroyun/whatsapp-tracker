@@ -1,0 +1,1 @@
+(function(){'use strict';document.addEventListener('submit',function(e){var f=e.target&&e.target.closest?e.target.closest('form[data-awm-confirm]'):null;if(!f)return;var m=f.getAttribute('data-awm-confirm')||'Are you sure?';if(!window.confirm(m))e.preventDefault();},true);})();
