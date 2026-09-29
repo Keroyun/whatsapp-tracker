@@ -54,6 +54,7 @@ require_once AWM_PLUGIN_DIR . 'includes/emergency.php';
 require_once AWM_PLUGIN_DIR . 'includes/notice-form.php';
 require_once AWM_PLUGIN_DIR . 'includes/frontend.php';
 require_once AWM_PLUGIN_DIR . 'includes/updater.php';
+require_once AWM_PLUGIN_DIR . 'includes/maintenance.php';
 
 if ( is_admin() ) {
 	require_once AWM_PLUGIN_DIR . 'admin/admin-core.php';
