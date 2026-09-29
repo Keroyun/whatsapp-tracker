@@ -183,14 +183,20 @@ function awm_activate() {
 	add_option( 'awm_managed_routes', array(), '', false );
 	add_option( 'awm_audit_retention_days', '365' );
 	add_option( 'awm_delete_data_on_uninstall', '0' );
+	add_option( 'awm_live_chat_provider', 'none' );
+	add_option( 'awm_manager_roles', array( 'administrator' ) );
+	add_option( 'awm_scheduled_scan_frequency', 'off' );
+	add_option( 'awm_scheduled_scan_status', array(), '', false );
 	update_option( 'awm_db_version', AWM_DB_VERSION );
 	update_option( 'awm_rewrite_version', AWM_VERSION, false );
+	awm_activate_capabilities();
 	awm_register_managed_route_rewrite();
 	flush_rewrite_rules( false );
 
 	if ( ! wp_next_scheduled( 'awm_daily_cleanup' ) ) {
 		wp_schedule_event( time() + HOUR_IN_SECONDS, 'daily', 'awm_daily_cleanup' );
 	}
+	awm_reschedule_recent_scan();
 }
 
 register_deactivation_hook( AWM_PLUGIN_FILE, 'awm_deactivate' );
@@ -199,6 +205,7 @@ function awm_deactivate() {
 	if ( $timestamp ) {
 		wp_unschedule_event( $timestamp, 'awm_daily_cleanup' );
 	}
+	wp_clear_scheduled_hook( 'awm_scheduled_recent_scan' );
 }
 
 add_action( 'plugins_loaded', 'awm_maybe_upgrade' );

@@ -10,22 +10,23 @@ function awm_admin_menu() {
 	add_menu_page(
 		'WhatsApp Tracker',
 		'WhatsApp Tracker',
-		'manage_options',
+		AWM_CAPABILITY,
 		AWM_MENU_SLUG,
 		'awm_dashboard_page',
 		'dashicons-format-chat',
 		58
 	);
 
-	add_submenu_page( AWM_MENU_SLUG, 'Dashboard', 'Dashboard', 'manage_options', AWM_MENU_SLUG, 'awm_dashboard_page' );
-	add_submenu_page( AWM_MENU_SLUG, 'Page Analytics', 'Page Analytics', 'manage_options', 'awm-pages', 'awm_page_analytics_page' );
-	add_submenu_page( AWM_MENU_SLUG, 'Central Routes', 'Central Routes', 'manage_options', 'awm-routes', 'awm_managed_routes_page' );
-	add_submenu_page( AWM_MENU_SLUG, 'Bulk Migration', 'Bulk Migration', 'manage_options', 'awm-migration', 'awm_bulk_migration_page' );
-	add_submenu_page( AWM_MENU_SLUG, 'Emergency Popups', 'Emergency Popups', 'manage_options', 'awm-emergency', 'awm_emergency_popups_page' );
-	add_submenu_page( AWM_MENU_SLUG, 'Link Inventory', 'Link Inventory', 'manage_options', 'awm-inventory', 'awm_inventory_page' );
-	add_submenu_page( AWM_MENU_SLUG, 'Link Generator', 'Link Generator', 'manage_options', 'awm-generator', 'awm_generator_page' );
-	add_submenu_page( AWM_MENU_SLUG, 'Audit Log', 'Audit Log', 'manage_options', 'awm-audit', 'awm_audit_log_page' );
-	add_submenu_page( AWM_MENU_SLUG, 'Settings', 'Settings', 'manage_options', 'awm-settings', 'awm_settings_page' );
+	add_submenu_page( AWM_MENU_SLUG, 'Dashboard', 'Dashboard', AWM_CAPABILITY, AWM_MENU_SLUG, 'awm_dashboard_page' );
+	add_submenu_page( AWM_MENU_SLUG, 'Page Analytics', 'Page Analytics', AWM_CAPABILITY, 'awm-pages', 'awm_page_analytics_page' );
+	add_submenu_page( AWM_MENU_SLUG, 'Central Routes', 'Central Routes', AWM_CAPABILITY, 'awm-routes', 'awm_managed_routes_page' );
+	add_submenu_page( AWM_MENU_SLUG, 'Bulk Migration', 'Bulk Migration', AWM_CAPABILITY, 'awm-migration', 'awm_bulk_migration_page' );
+	add_submenu_page( AWM_MENU_SLUG, 'Emergency Popups', 'Emergency Popups', AWM_CAPABILITY, 'awm-emergency', 'awm_emergency_popups_page' );
+	add_submenu_page( AWM_MENU_SLUG, 'Link Inventory', 'Link Inventory', AWM_CAPABILITY, 'awm-inventory', 'awm_inventory_page' );
+	add_submenu_page( AWM_MENU_SLUG, 'Link Generator', 'Link Generator', AWM_CAPABILITY, 'awm-generator', 'awm_generator_page' );
+	add_submenu_page( AWM_MENU_SLUG, 'Audit Log', 'Audit Log', AWM_CAPABILITY, 'awm-audit', 'awm_audit_log_page' );
+	add_submenu_page( AWM_MENU_SLUG, 'Settings', 'Settings', AWM_CAPABILITY, 'awm-settings', 'awm_settings_page' );
+	add_submenu_page( AWM_MENU_SLUG, 'Tools', 'Tools', AWM_CAPABILITY, 'awm-tools', 'awm_tools_page' );
 }
 
 /**
@@ -41,7 +42,7 @@ function awm_is_plugin_admin_page() {
 		return false;
 	}
 	$page = sanitize_key( wp_unslash( $_GET['page'] ) );
-	return in_array( $page, array( AWM_MENU_SLUG, 'awm-pages', 'awm-routes', 'awm-migration', 'awm-emergency', 'awm-inventory', 'awm-generator', 'awm-audit', 'awm-settings' ), true );
+	return in_array( $page, array( AWM_MENU_SLUG, 'awm-pages', 'awm-routes', 'awm-migration', 'awm-emergency', 'awm-inventory', 'awm-generator', 'awm-audit', 'awm-settings', 'awm-tools' ), true );
 }
 
 
@@ -99,7 +100,7 @@ function awm_legacy_table_detected() {
 }
 
 function awm_dashboard_page() {
-	if ( ! current_user_can( 'manage_options' ) ) {
+	if ( ! current_user_can( AWM_CAPABILITY ) ) {
 		return;
 	}
 
@@ -111,6 +112,7 @@ function awm_dashboard_page() {
 	$approved    = awm_approved_number_map();
 	$approved_entries = awm_get_approved_numbers();
 	$active_emergency_rules = awm_get_active_emergency_rules();
+	$health = awm_health_summary();
 
 	$top_destinations = array();
 	$top_pages        = array();
@@ -129,6 +131,20 @@ function awm_dashboard_page() {
 			<div class="awm-warning"><strong>Emergency popup mode is active:</strong> <?php echo esc_html( number_format_i18n( count( $active_emergency_rules ) ) ); ?> rule(s) may divert matching WhatsApp or telephone clicks. <a href="<?php echo esc_url( admin_url( 'admin.php?page=awm-emergency' ) ); ?>">Review emergency popups</a>.</div>
 		<?php endif; ?>
 		<p><a class="button" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=awm_export_clicks' ), 'awm_export_clicks' ) ); ?>">Export Click Analytics CSV</a></p>
+
+		<div class="awm-card awm-mt18">
+			<h2>Plugin Health</h2>
+			<div class="awm-table-wrap"><table class="widefat striped"><tbody>
+				<tr><th>Tracking</th><td><?php echo $health['tracking'] ? 'Enabled' : 'Disabled'; ?></td></tr>
+				<tr><th>Approved numbers</th><td><?php echo esc_html( number_format_i18n( $health['approved_numbers'] ) ); ?></td></tr>
+				<tr><th>Unknown inventory links</th><td><?php echo esc_html( number_format_i18n( $health['unknown_links'] ) ); ?></td></tr>
+				<tr><th>Unresolved wa.link entries</th><td><?php echo esc_html( number_format_i18n( $health['unresolved_shortlinks'] ) ); ?></td></tr>
+				<tr><th>Routes using backup line</th><td><?php echo esc_html( number_format_i18n( $health['backup_routes'] ) ); ?></td></tr>
+				<tr><th>Active contact notices</th><td><?php echo esc_html( number_format_i18n( $health['active_notices'] ) ); ?></td></tr>
+				<tr><th>Last inventory update</th><td><?php echo esc_html( $health['last_scan'] ?: 'Never' ); ?></td></tr>
+				<tr><th>Scheduled Recent Changes</th><td><?php echo esc_html( ucfirst( $health['scheduled_frequency'] ) ); ?><?php if ( ! empty( $health['scheduled_status']['message'] ) ) : ?> — <?php echo esc_html( $health['scheduled_status']['message'] ); ?><?php endif; ?></td></tr>
+			</tbody></table></div>
+		</div>
 
 		<div class="awm-grid">
 			<div class="awm-card"><div class="awm-muted">Clicks Today</div><div class="awm-metric"><?php echo esc_html( number_format_i18n( $metrics['today'] ) ); ?></div></div>
@@ -395,7 +411,7 @@ function awm_page_analytics_filter_args( $filters ) {
 }
 
 function awm_page_analytics_page() {
-	if ( ! current_user_can( 'manage_options' ) ) {
+	if ( ! current_user_can( AWM_CAPABILITY ) ) {
 		return;
 	}
 
@@ -517,7 +533,7 @@ function awm_csv_safe_cell( $value ) {
 
 add_action( 'admin_post_awm_export_page_analytics', 'awm_export_page_analytics_csv' );
 function awm_export_page_analytics_csv() {
-	if ( ! current_user_can( 'manage_options' ) ) {
+	if ( ! current_user_can( AWM_CAPABILITY ) ) {
 		wp_die( 'Insufficient permissions.' );
 	}
 	check_admin_referer( 'awm_export_page_analytics' );
@@ -564,7 +580,7 @@ function awm_export_page_analytics_csv() {
 
 add_action( 'admin_post_awm_export_clicks', 'awm_export_clicks_csv' );
 function awm_export_clicks_csv() {
-	if ( ! current_user_can( 'manage_options' ) ) {
+	if ( ! current_user_can( AWM_CAPABILITY ) ) {
 		wp_die( 'Insufficient permissions.' );
 	}
 	check_admin_referer( 'awm_export_clicks' );
@@ -612,7 +628,7 @@ function awm_export_clicks_csv() {
 
 add_action( 'admin_post_awm_export_inventory', 'awm_export_inventory_csv' );
 function awm_export_inventory_csv() {
-	if ( ! current_user_can( 'manage_options' ) ) {
+	if ( ! current_user_can( AWM_CAPABILITY ) ) {
 		wp_die( 'Insufficient permissions.' );
 	}
 	check_admin_referer( 'awm_export_inventory' );

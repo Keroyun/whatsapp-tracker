@@ -47,6 +47,30 @@ class AWM_Emergency_Test extends WP_UnitTestCase {
 		}
 	}
 
+	public function test_legacy_tawk_action_is_migrated_to_generic_live_chat() {
+		$rule = awm_emergency_sanitize_rule( array( 'primary_action' => 'tawk' ) );
+		$this->assertSame( 'live_chat', $rule['primary_action'] );
+	}
+
+	public function test_internal_rule_name_is_not_exposed_in_public_config() {
+		$previous = get_option( 'awm_emergency_rules', array() );
+		try {
+			update_option( 'awm_emergency_rules', array( array(
+				'id' => 'private-rule',
+				'name' => 'Internal Client Outage Name',
+				'analytics_label' => 'service_outage',
+				'enabled' => '1',
+				'channel' => 'telephone',
+				'destinations' => array( 'tel:+12025550101' ),
+			) ) );
+			$active = awm_get_active_emergency_rules();
+			$this->assertArrayNotHasKey( 'name', $active[0] );
+			$this->assertSame( 'service_outage', $active[0]['analyticsLabel'] );
+		} finally {
+			update_option( 'awm_emergency_rules', $previous );
+		}
+	}
+
 	public function test_popup_visibility_defaults_on_and_channels_are_independent() {
 		$sentinel = '__awm_missing__';
 		$previous_whatsapp = get_option( 'awm_whatsapp_popup_enabled', $sentinel );

@@ -239,6 +239,7 @@
 				emergencyRules = settings.emergencyRules;
 				trackingEnabled = settings.trackingEnabled;
 				popupEnabled = refreshedVisibility;
+				if ( typeof settings.liveChatProvider === 'string' ) cfg.liveChatProvider = settings.liveChatProvider;
 				syncTelephoneLinks();
 				if (modal && !modal.hidden && activeParsed) {
 					var updatedRule = findEmergencyRule(activeParsed);
@@ -340,18 +341,18 @@
 			pushDataLayer({
 				event: activeParsed.channel === 'telephone' ? 'telephone_alternative_channel_click' : 'whatsapp_alternative_channel_click',
 				contact_channel: activeParsed.channel,
-				emergency_rule: activeRule.name || activeRule.id,
-				alternative_channel: activeRule.primaryAction === 'tawk' ? 'tawk' : 'primary_url',
+				emergency_rule: activeRule.analyticsLabel || activeRule.id,
+				alternative_channel: activeRule.primaryAction === 'live_chat' ? (cfg.liveChatProvider || 'live_chat') : 'primary_url',
 				page_path: window.location.pathname
 			});
-			if (activeRule.primaryAction === 'tawk') {
+			if (activeRule.primaryAction === 'live_chat') {
 				try {
-					if (window.Tawk_API && typeof window.Tawk_API.maximize === 'function') {
+					if (cfg.liveChatProvider === 'tawk' && window.Tawk_API && typeof window.Tawk_API.maximize === 'function') {
 						window.Tawk_API.maximize();
 						closeEmergencyModal();
 						return;
 					}
-					if (window.Tawk_API && typeof window.Tawk_API.toggle === 'function') {
+					if (cfg.liveChatProvider === 'tawk' && window.Tawk_API && typeof window.Tawk_API.toggle === 'function') {
 						window.Tawk_API.toggle();
 						closeEmergencyModal();
 						return;
@@ -370,7 +371,7 @@
 			pushDataLayer({
 				event: activeParsed.channel === 'telephone' ? 'telephone_alternative_channel_click' : 'whatsapp_alternative_channel_click',
 				contact_channel: activeParsed.channel,
-				emergency_rule: activeRule.name || activeRule.id,
+				emergency_rule: activeRule.analyticsLabel || activeRule.id,
 				alternative_channel: 'secondary_url',
 				page_path: window.location.pathname
 			});
@@ -432,7 +433,7 @@
 		var popupPayload = {
 			event: parsed.channel === 'telephone' ? 'telephone_emergency_popup' : 'whatsapp_emergency_popup',
 			contact_channel: parsed.channel,
-			emergency_rule: rule.name || rule.id,
+			emergency_rule: rule.analyticsLabel || rule.id,
 			page_path: window.location.pathname
 		};
 		popupPayload[parsed.channel === 'telephone' ? 'telephone_destination' : 'whatsapp_destination'] = parsed.destination || 'unknown';

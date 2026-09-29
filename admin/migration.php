@@ -132,7 +132,7 @@ function awm_migration_link_matches( $url, $run ) {
 
 function awm_migration_replacement_language( $run, $post_id ) {
 	$language = sanitize_key( (string) $run->language_mode );
-	return in_array( $language, array( 'en', 'zh', 'id' ), true ) ? $language : awm_detect_post_language( $post_id );
+	return ( 'auto' !== $language && $language ) ? $language : awm_detect_post_language( $post_id );
 }
 
 function awm_migration_shortcode_attribute( $value ) {
@@ -383,7 +383,7 @@ function awm_migration_process_item( $item, $direction ) {
 
 function awm_migration_ajax_guard() {
 	check_ajax_referer( 'awm_migration', 'nonce' );
-	if ( ! current_user_can( 'manage_options' ) ) {
+	if ( ! current_user_can( AWM_CAPABILITY ) ) {
 		wp_send_json_error( array( 'message' => 'Insufficient permissions.' ), 403 );
 	}
 }
@@ -397,9 +397,9 @@ function awm_ajax_migration_preview_start() {
 	$match_value  = awm_migration_normalize_match_value( $match_type, isset( $_POST['match_value'] ) ? wp_unslash( $_POST['match_value'] ) : '' );
 	$page_scope   = awm_emergency_normalize_page_path( isset( $_POST['page_scope'] ) ? wp_unslash( $_POST['page_scope'] ) : '*' );
 	$language     = isset( $_POST['language_mode'] ) ? sanitize_key( wp_unslash( $_POST['language_mode'] ) ) : 'auto';
-	$language     = in_array( $language, array( 'auto', 'en', 'zh', 'id' ), true ) ? $language : 'auto';
+	$language     = ( 'auto' === $language || in_array( $language, awm_available_languages(), true ) ) ? $language : 'auto';
 	$route = awm_get_managed_route( $route_slug );
-	if ( ! $route || ! awm_managed_route_destination_url( $route, 'en' ) || ! $match_value ) {
+	if ( ! $route || ! awm_managed_route_destination_url( $route, awm_default_language() ) || ! $match_value ) {
 		wp_send_json_error( array( 'message' => 'Choose an active central route with a usable number, and enter a valid source destination or exact WhatsApp link.' ), 400 );
 	}
 
@@ -518,7 +518,7 @@ function awm_ajax_migration_rollback_batch() {
 
 add_action( 'admin_post_awm_delete_migration_run', 'awm_delete_migration_run' );
 function awm_delete_migration_run() {
-	if ( ! current_user_can( 'manage_options' ) ) {
+	if ( ! current_user_can( AWM_CAPABILITY ) ) {
 		wp_die( 'Insufficient permissions.' );
 	}
 	check_admin_referer( 'awm_delete_migration_run' );
@@ -537,7 +537,7 @@ function awm_delete_migration_run() {
 }
 
 function awm_bulk_migration_page() {
-	if ( ! current_user_can( 'manage_options' ) ) {
+	if ( ! current_user_can( AWM_CAPABILITY ) ) {
 		return;
 	}
 	global $wpdb;
@@ -565,7 +565,7 @@ function awm_bulk_migration_page() {
 					<tr><th><label for="awm-match-type">Find Existing Links By</label></th><td><select id="awm-match-type" name="match_type"><option value="destination">Number or wa.link destination</option><option value="exact_link">Exact WhatsApp link</option></select></td></tr>
 					<tr><th><label for="awm-match-value">Existing Value</label></th><td><input id="awm-match-value" name="match_value" type="text" class="large-text code" required placeholder="12025550100 or https://wa.me/..."><p class="description">Destination matching includes resolved wa.link shortlinks when a resolution is available.</p></td></tr>
 					<tr><th><label for="awm-page-scope">Page Scope</label></th><td><input id="awm-page-scope" name="page_scope" type="text" class="large-text code" value="*"><p class="description"><code>*</code> for all eligible content, an exact path such as <code>/example-page/</code>, or a prefix such as <code>/example-section/*</code>.</p></td></tr>
-					<tr><th><label for="awm-language-mode">Managed Link Language</label></th><td><select id="awm-language-mode" name="language_mode"><option value="auto">Detect from each post</option><option value="en">Default message</option><option value="zh">Chinese override (zh)</option><option value="id">Indonesian override (id)</option></select></td></tr>
+					<tr><th><label for="awm-language-mode">Managed Link Language</label></th><td><select id="awm-language-mode" name="language_mode"><option value="auto">Detect from each post</option><?php foreach ( awm_available_languages() as $language_code ) : ?><option value="<?php echo esc_attr( $language_code ); ?>"><?php echo esc_html( strtoupper( $language_code ) . ( $language_code === awm_default_language() ? ' — default' : '' ) ); ?></option><?php endforeach; ?></select></td></tr>
 				</table>
 				<p><button type="submit" class="button button-primary">Create Dry-Run Preview</button></p>
 			</form>

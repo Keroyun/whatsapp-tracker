@@ -28,7 +28,7 @@ function awm_emergency_redirect( $notice, $edit_id = '' ) {
 
 add_action( 'admin_post_awm_save_popup_visibility', 'awm_save_popup_visibility' );
 function awm_save_popup_visibility() {
-	if ( ! current_user_can( 'manage_options' ) ) {
+	if ( ! current_user_can( AWM_CAPABILITY ) ) {
 		wp_die( 'Insufficient permissions.' );
 	}
 	check_admin_referer( 'awm_save_popup_visibility' );
@@ -40,7 +40,7 @@ function awm_save_popup_visibility() {
 
 add_action( 'admin_post_awm_save_emergency_rule', 'awm_save_emergency_rule' );
 function awm_save_emergency_rule() {
-	if ( ! current_user_can( 'manage_options' ) ) {
+	if ( ! current_user_can( AWM_CAPABILITY ) ) {
 		wp_die( 'Insufficient permissions.' );
 	}
 	check_admin_referer( 'awm_save_emergency_rule' );
@@ -71,7 +71,7 @@ function awm_save_emergency_rule() {
 
 add_action( 'admin_post_awm_toggle_emergency_rule', 'awm_toggle_emergency_rule' );
 function awm_toggle_emergency_rule() {
-	if ( ! current_user_can( 'manage_options' ) ) {
+	if ( ! current_user_can( AWM_CAPABILITY ) ) {
 		wp_die( 'Insufficient permissions.' );
 	}
 	check_admin_referer( 'awm_toggle_emergency_rule' );
@@ -95,7 +95,7 @@ function awm_toggle_emergency_rule() {
 
 add_action( 'admin_post_awm_delete_emergency_rule', 'awm_delete_emergency_rule' );
 function awm_delete_emergency_rule() {
-	if ( ! current_user_can( 'manage_options' ) ) {
+	if ( ! current_user_can( AWM_CAPABILITY ) ) {
 		wp_die( 'Insufficient permissions.' );
 	}
 	check_admin_referer( 'awm_delete_emergency_rule' );
@@ -131,7 +131,7 @@ function awm_emergency_target_summary( $rule ) {
 }
 
 function awm_emergency_popups_page() {
-	if ( ! current_user_can( 'manage_options' ) ) {
+	if ( ! current_user_can( AWM_CAPABILITY ) ) {
 		return;
 	}
 
@@ -247,7 +247,8 @@ function awm_emergency_popups_page() {
 				<input type="hidden" name="rule[id]" value="<?php echo esc_attr( $editing['id'] ); ?>">
 				<?php wp_nonce_field( 'awm_save_emergency_rule' ); ?>
 				<table class="form-table" role="presentation">
-					<tr><th><label for="awm-rule-name"><?php esc_html_e( 'Rule Name', 'whatsapp-tracker' ); ?></label></th><td><input id="awm-rule-name" name="rule[name]" type="text" class="regular-text" maxlength="191" required value="<?php echo esc_attr( $editing['name'] ); ?>"><p class="description"><?php esc_html_e( 'Internal name, for example: WhatsApp Outage — Main Contact.', 'whatsapp-tracker' ); ?></p></td></tr>
+					<tr><th><label for="awm-rule-name"><?php esc_html_e( 'Rule Name', 'whatsapp-tracker' ); ?></label></th><td><input id="awm-rule-name" name="rule[name]" type="text" class="regular-text" maxlength="191" required value="<?php echo esc_attr( $editing['name'] ); ?>"><p class="description"><?php esc_html_e( 'Internal administrator-only name, for example: WhatsApp Outage — Main Contact.', 'whatsapp-tracker' ); ?></p></td></tr>
+					<tr><th><label for="awm-analytics-label"><?php esc_html_e( 'Analytics Label', 'whatsapp-tracker' ); ?></label></th><td><input id="awm-analytics-label" name="rule[analytics_label]" type="text" class="regular-text code" maxlength="80" value="<?php echo esc_attr( $editing['analytics_label'] ?? 'contact_unavailable' ); ?>"><p class="description"><?php esc_html_e( 'Public-safe event label sent to dataLayer. The internal Rule Name is not exposed to visitors.', 'whatsapp-tracker' ); ?></p></td></tr>
 					<tr><th><?php esc_html_e( 'Rule Status', 'whatsapp-tracker' ); ?></th><td><label><input type="checkbox" name="rule[enabled]" value="1" <?php checked( $editing['enabled'], '1' ); ?>><?php esc_html_e( 'Enable this emergency popup', 'whatsapp-tracker' ); ?></label><p class="description"><?php esc_html_e( 'Test the targets and alternative contact links before enabling the rule on production.', 'whatsapp-tracker' ); ?></p></td></tr>
 					<tr><th><label for="awm-rule-priority"><?php esc_html_e( 'Priority', 'whatsapp-tracker' ); ?></label></th><td><input id="awm-rule-priority" name="rule[priority]" type="number" min="0" max="999" value="<?php echo esc_attr( $editing['priority'] ); ?>"><p class="description"><?php esc_html_e( 'Used only when two matching rules are equally specific. Higher priority wins.', 'whatsapp-tracker' ); ?></p></td></tr>
 					<tr><th><label for="awm-rule-channel"><?php esc_html_e( 'Channel', 'whatsapp-tracker' ); ?></label></th><td><select id="awm-rule-channel" name="rule[channel]"><?php foreach ( array( 'whatsapp' => 'WhatsApp', 'telephone' => 'Telephone', 'both' => 'Both' ) as $value => $label ) : ?><option value="<?php echo esc_attr( $value ); ?>" <?php selected( $editing['channel'], $value ); ?>><?php echo esc_html( $label ); ?></option><?php endforeach; ?></select><p class="description"><?php esc_html_e( 'Existing rules remain WhatsApp only. Short telephone service numbers are never intercepted. Add data-awm-emergency-exempt="1" to any emergency-service link that must always open normally.', 'whatsapp-tracker' ); ?></p></td></tr>
@@ -268,8 +269,8 @@ function awm_emergency_popups_page() {
 					<tr><th><label for="awm-popup-title"><?php esc_html_e( 'Title', 'whatsapp-tracker' ); ?></label></th><td><input id="awm-popup-title" name="rule[popup_title]" type="text" class="large-text" maxlength="191" required value="<?php echo esc_attr( $editing['popup_title'] ); ?>"></td></tr>
 					<tr><th><label for="awm-popup-message"><?php esc_html_e( 'Message', 'whatsapp-tracker' ); ?></label></th><td><textarea id="awm-popup-message" name="rule[popup_message]" rows="5" class="large-text" maxlength="1000" required><?php echo esc_textarea( $editing['popup_message'] ); ?></textarea></td></tr>
 					<tr><th><label for="awm-primary-label"><?php esc_html_e( 'Primary Button', 'whatsapp-tracker' ); ?></label></th><td><input id="awm-primary-label" name="rule[primary_label]" type="text" class="regular-text" maxlength="80" value="<?php echo esc_attr( $editing['primary_label'] ); ?>"></td></tr>
-					<tr><th><label for="awm-primary-action"><?php esc_html_e( 'Primary Action', 'whatsapp-tracker' ); ?></label></th><td><select id="awm-primary-action" name="rule[primary_action]"><option value="tawk" <?php selected( $editing['primary_action'], 'tawk' ); ?>><?php esc_html_e( 'Open Tawk.to Live Chat', 'whatsapp-tracker' ); ?></option><option value="url" <?php selected( $editing['primary_action'], 'url' ); ?>><?php esc_html_e( 'Open a URL', 'whatsapp-tracker' ); ?></option></select></td></tr>
-					<tr><th><label for="awm-primary-url"><?php esc_html_e( 'Primary / Tawk Fallback URL', 'whatsapp-tracker' ); ?></label></th><td><input id="awm-primary-url" name="rule[primary_url]" type="url" class="large-text" value="<?php echo esc_attr( $editing['primary_url'] ); ?>" placeholder="<?php echo esc_attr( home_url( '/' ) ); ?>"><p class="description"><?php esc_html_e( 'Use https://, http://, or tel: followed by a full contact number. For Tawk.to, visitors are sent here if the widget is unavailable. Provide a fallback URL.', 'whatsapp-tracker' ); ?></p></td></tr>
+					<tr><th><label for="awm-primary-action"><?php esc_html_e( 'Primary Action', 'whatsapp-tracker' ); ?></label></th><td><select id="awm-primary-action" name="rule[primary_action]"><option value="live_chat" <?php selected( in_array( $editing['primary_action'], array( 'live_chat', 'tawk' ), true ) ? 'live_chat' : $editing['primary_action'], 'live_chat' ); ?>><?php esc_html_e( 'Open configured live chat', 'whatsapp-tracker' ); ?></option><option value="url" <?php selected( $editing['primary_action'], 'url' ); ?>><?php esc_html_e( 'Open a URL', 'whatsapp-tracker' ); ?></option></select></td></tr>
+					<tr><th><label for="awm-primary-url"><?php esc_html_e( 'Primary / Live Chat Fallback URL', 'whatsapp-tracker' ); ?></label></th><td><input id="awm-primary-url" name="rule[primary_url]" type="url" class="large-text" value="<?php echo esc_attr( $editing['primary_url'] ); ?>" placeholder="<?php echo esc_attr( home_url( '/' ) ); ?>"><p class="description"><?php esc_html_e( 'Use https://, http://, or tel: followed by a full contact number. For live chat, visitors are sent here if the configured provider is unavailable. Provide a fallback URL.', 'whatsapp-tracker' ); ?></p></td></tr>
 					<tr><th><label for="awm-secondary-label"><?php esc_html_e( 'Secondary Button', 'whatsapp-tracker' ); ?></label></th><td><input id="awm-secondary-label" name="rule[secondary_label]" type="text" class="regular-text" maxlength="80" value="<?php echo esc_attr( $editing['secondary_label'] ); ?>"></td></tr>
 					<tr><th><label for="awm-secondary-url"><?php esc_html_e( 'Secondary URL', 'whatsapp-tracker' ); ?></label></th><td><input id="awm-secondary-url" name="rule[secondary_url]" type="url" class="large-text" value="<?php echo esc_attr( $editing['secondary_url'] ); ?>" placeholder="<?php echo esc_attr( home_url( '/' ) ); ?>"></td></tr>
 					<tr><th><?php esc_html_e( 'Optional Third Button', 'whatsapp-tracker' ); ?></th><td><label><input type="checkbox" name="rule[third_enabled]" value="1" <?php checked( $editing['third_enabled'], '1' ); ?>><?php esc_html_e( 'Show a third action button', 'whatsapp-tracker' ); ?></label><p class="description"><?php esc_html_e( 'Off by default. The X always remains available to close the popup.', 'whatsapp-tracker' ); ?></p></td></tr>

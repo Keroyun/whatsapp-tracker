@@ -59,6 +59,7 @@ function awm_enqueue_frontend_tracker() {
 		'configEndpoint' => esc_url_raw( rest_url( 'whatsapp-tracker/v1/emergency-rules' ) ),
 		'trackingEnabled' => $tracking_enabled,
 		'popupEnabled'    => awm_get_popup_visibility(),
+		'liveChatProvider' => sanitize_key( (string) get_option( 'awm_live_chat_provider', 'none' ) ),
 		'language'       => function_exists( 'pll_current_language' ) ? (string) pll_current_language( 'slug' ) : '',
 		'direction'      => is_rtl() ? 'rtl' : 'ltr',
 		'emergencyRules' => $emergency_rules,
@@ -108,6 +109,7 @@ function awm_rest_emergency_config() {
 		'emergencyRules' => awm_get_active_emergency_rules(),
 		'trackingEnabled' => '1' === get_option( 'awm_tracking_enabled', '1' ),
 		'popupEnabled'    => awm_get_popup_visibility(),
+		'liveChatProvider' => sanitize_key( (string) get_option( 'awm_live_chat_provider', 'none' ) ),
 	), 200 );
 	$response->header( 'Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0' );
 	return $response;

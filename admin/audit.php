@@ -2,7 +2,7 @@
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 function awm_audit_log_page() {
-	if ( ! current_user_can( 'manage_options' ) ) { return; }
+	if ( ! current_user_can( AWM_CAPABILITY ) ) { return; }
 	global $wpdb;
 	$table = awm_audit_log_table();
 	$page  = max( 1, isset( $_GET['paged'] ) ? absint( $_GET['paged'] ) : 1 );
