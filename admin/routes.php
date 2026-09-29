@@ -119,6 +119,9 @@ function awm_managed_routes_page() {
 	$routes  = awm_get_managed_routes();
 	$edit    = isset( $_GET['edit'] ) ? awm_managed_route_slug( wp_unslash( $_GET['edit'] ) ) : '';
 	$route   = $edit && isset( $routes[ $edit ] ) ? array_merge( awm_managed_route_defaults(), $routes[ $edit ] ) : awm_managed_route_defaults();
+	$route['messages'] = awm_managed_route_messages( $route );
+	$languages = awm_available_languages();
+	$default_language = awm_default_language();
 	$is_edit = (bool) ( $edit && isset( $routes[ $edit ] ) );
 	$notice  = isset( $_GET['awm_notice'] ) ? sanitize_key( wp_unslash( $_GET['awm_notice'] ) ) : '';
 	$messages = array(
@@ -148,7 +151,7 @@ function awm_managed_routes_page() {
 					<td><span class="awm-status <?php echo '1' === $item['enabled'] ? 'awm-status-approved' : ''; ?>"><?php echo '1' === $item['enabled'] ? 'Active' : 'Disabled'; ?></span><br><span class="awm-muted"><?php echo 'backup' === $item['active_line'] ? 'Backup line' : 'Primary line'; ?></span></td>
 					<td><strong><?php echo esc_html( $item['name'] ); ?></strong><br><code><?php echo esc_html( $slug ); ?></code><?php if ( $item['source_label'] ) : ?><br><span class="awm-muted"><?php echo esc_html( $item['source_label'] ); ?></span><?php endif; ?></td>
 					<td><code><?php echo esc_html( awm_managed_route_number( $item ) ?: 'Not configured' ); ?></code></td>
-					<td><div><a href="<?php echo esc_url( awm_managed_route_url( $slug, 'en' ) ); ?>" target="_blank" rel="noopener noreferrer">Default</a><?php if ( trim( (string) $item['message_zh'] ) !== '' ) : ?> · <a href="<?php echo esc_url( awm_managed_route_url( $slug, 'zh' ) ); ?>" target="_blank" rel="noopener noreferrer">ZH</a><?php endif; ?><?php if ( trim( (string) $item['message_id'] ) !== '' ) : ?> · <a href="<?php echo esc_url( awm_managed_route_url( $slug, 'id' ) ); ?>" target="_blank" rel="noopener noreferrer">ID</a><?php endif; ?></div><code><?php echo esc_html( awm_managed_route_url( $slug ) ); ?></code></td>
+					<td><div><?php $route_messages = awm_managed_route_messages( $item ); ?><a href="<?php echo esc_url( awm_managed_route_url( $slug, awm_default_language() ) ); ?>" target="_blank" rel="noopener noreferrer">Default</a><?php foreach ( $route_messages as $language_code => $message ) : if ( $language_code === awm_default_language() ) { continue; } ?> · <a href="<?php echo esc_url( awm_managed_route_url( $slug, $language_code ) ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html( strtoupper( $language_code ) ); ?></a><?php endforeach; ?></div><code><?php echo esc_html( awm_managed_route_url( $slug ) ); ?></code></td>
 					<td><?php echo esc_html( $item['updated_at'] ?: '—' ); ?></td>
 					<td>
 						<a class="button button-small" href="<?php echo esc_url( add_query_arg( array( 'page' => 'awm-routes', 'edit' => $slug ), admin_url( 'admin.php' ) ) ); ?>">Edit</a>
@@ -173,9 +176,10 @@ function awm_managed_routes_page() {
 					<tr><th><label for="awm-backup-number">Backup Number</label></th><td><input id="awm-backup-number" name="route[backup_number]" type="text" class="regular-text code" value="<?php echo esc_attr( $route['backup_number'] ); ?>" placeholder="12025550108"></td></tr>
 					<tr><th><label for="awm-active-line">Active Line</label></th><td><select id="awm-active-line" name="route[active_line]"><option value="primary" <?php selected( $route['active_line'], 'primary' ); ?>>Primary</option><option value="backup" <?php selected( $route['active_line'], 'backup' ); ?>>Backup</option></select></td></tr>
 					<tr><th><label for="awm-route-source">Source / Use Case</label></th><td><input id="awm-route-source" name="route[source_label]" type="text" class="regular-text" maxlength="191" value="<?php echo esc_attr( $route['source_label'] ); ?>" placeholder="Customer Support"><p class="description">Used for tracker attribution.</p></td></tr>
-					<tr><th><label for="awm-message-en">Default Message</label></th><td><textarea id="awm-message-en" name="route[message_en]" rows="4" class="large-text" maxlength="1000"><?php echo esc_textarea( $route['message_en'] ); ?></textarea></td></tr>
-					<tr><th><label for="awm-message-zh">Optional Chinese (zh) Message</label></th><td><textarea id="awm-message-zh" name="route[message_zh]" rows="4" class="large-text" maxlength="1000"><?php echo esc_textarea( $route['message_zh'] ); ?></textarea><p class="description">Falls back to the default message when empty.</p></td></tr>
-					<tr><th><label for="awm-message-id">Optional Indonesian (id) Message</label></th><td><textarea id="awm-message-id" name="route[message_id]" rows="4" class="large-text" maxlength="1000"><?php echo esc_textarea( $route['message_id'] ); ?></textarea><p class="description">Falls back to the default message when empty.</p></td></tr>
+					<?php if ( ! $languages ) : $languages = array( $default_language ); endif; ?>
+					<?php foreach ( $languages as $language_code ) : $language_label = strtoupper( $language_code ); ?>
+					<tr><th><label for="awm-message-<?php echo esc_attr( $language_code ); ?>"><?php echo esc_html( $language_code === $default_language ? 'Default Message (' . $language_label . ')' : 'Optional Message (' . $language_label . ')' ); ?></label></th><td><textarea id="awm-message-<?php echo esc_attr( $language_code ); ?>" name="route[messages][<?php echo esc_attr( $language_code ); ?>]" rows="4" class="large-text" maxlength="1000"><?php echo esc_textarea( $route['messages'][ $language_code ] ?? '' ); ?></textarea><?php if ( $language_code !== $default_language ) : ?><p class="description">Falls back to the default-language message when empty.</p><?php endif; ?></td></tr>
+					<?php endforeach; ?>
 					<tr><th><label for="awm-route-fallback">Unavailable Fallback URL</label></th><td><input id="awm-route-fallback" name="route[fallback_url]" type="url" class="large-text" value="<?php echo esc_attr( $route['fallback_url'] ); ?>"><p class="description">Used when the route is disabled or has no usable number. Keep this on the same website.</p></td></tr>
 				</table>
 				<?php submit_button( $is_edit ? 'Update Central Route' : 'Create Central Route' ); ?><?php if ( $is_edit ) : ?> <a class="button" href="<?php echo esc_url( admin_url( 'admin.php?page=awm-routes' ) ); ?>">Cancel Editing</a><?php endif; ?>
