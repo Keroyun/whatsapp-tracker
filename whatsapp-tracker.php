@@ -2,10 +2,11 @@
 /**
  * Plugin Name: WhatsApp Tracker
  * Description: Central WhatsApp routes, safe bulk migration, WhatsApp and telephone service notices, click analytics, source attribution, link inventory scanning, wa.link resolution and approved-number governance.
- * Version: 3.4.1
- * Author: Azhar
- * Author URI: https://github.com/Keroyun
- * Plugin URI: https://khairulazhar.com
+ * Version: 1.0.0
+ * Author: Khairul Azhar
+ * Author URI: https://khairulazhar.com
+ * Plugin URI: https://khairulazhar.com/my-plugins-and-tools/
+ * Update URI: https://github.com/Keroyun/whatsapp-tracker
  * Text Domain: whatsapp-tracker
  * Domain Path: /languages
  * License: GPL-2.0-or-later
@@ -15,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'AWM_VERSION', '3.4.1' );
+define( 'AWM_VERSION', '1.0.0' );
 define( 'AWM_DB_VERSION', '3.2.0' );
 define( 'AWM_MENU_SLUG', 'awm-dashboard' );
 define( 'AWM_PLUGIN_FILE', __FILE__ );
@@ -45,12 +46,14 @@ define( 'AWM_SHORTLINK_RESOLVE_MAX_BYTES', 128 * KB_IN_BYTES );
 define( 'AWM_SHORTLINK_RESOLVE_BATCH_LIMIT', 100 );
 
 require_once AWM_PLUGIN_DIR . 'includes/security.php';
+require_once AWM_PLUGIN_DIR . 'includes/capabilities.php';
 require_once AWM_PLUGIN_DIR . 'includes/database.php';
 require_once AWM_PLUGIN_DIR . 'includes/audit.php';
 require_once AWM_PLUGIN_DIR . 'includes/whatsapp.php';
 require_once AWM_PLUGIN_DIR . 'includes/emergency.php';
 require_once AWM_PLUGIN_DIR . 'includes/notice-form.php';
 require_once AWM_PLUGIN_DIR . 'includes/frontend.php';
+require_once AWM_PLUGIN_DIR . 'includes/updater.php';
 
 if ( is_admin() ) {
 	require_once AWM_PLUGIN_DIR . 'admin/admin-core.php';
@@ -60,5 +63,6 @@ if ( is_admin() ) {
 	require_once AWM_PLUGIN_DIR . 'admin/routes.php';
 	require_once AWM_PLUGIN_DIR . 'admin/emergency.php';
 	require_once AWM_PLUGIN_DIR . 'admin/settings.php';
+	require_once AWM_PLUGIN_DIR . 'admin/tools.php';
 	require_once AWM_PLUGIN_DIR . 'admin/audit.php';
 }
