@@ -1,34 +1,34 @@
-# WhatsApp Tracker 3.4.1 testing
+# WhatsApp Tracker 1.0.0 testing
 
-## Form isolation regression
+## Automated checks
 
-Run `wp eval-file tests/notice-form-integration.php` on a disposable WordPress installation with this plugin active. The checks restore the affected hooks after execution and cover callback ownership, exact-file/directory boundaries, unrelated-hook removal, core printer retention and early asset queue filtering without unregistering dependencies.
+The repository CI runs:
 
-Local browser regression uses a separate test plugin that injects head content, footer widgets and both early and enqueue-hook chat scripts. The form frame excludes those while the parent page retains them. Basic WPForms Lite AJAX submission is tested separately; live CAPTCHA, payment flows, every third-party provider and physical-device behavior are not certified by this regression.
+```sh
+bash tests/smoke.sh
+```
 
-## Completed for this release
+The smoke suite performs PHP syntax checks, JavaScript syntax checks and the Node frontend regression suite.
 
-- 37 Node regression checks using the actual release JavaScript: telephone and WhatsApp targeting, language-specific precedence and target-sensitive Default fallback, third action hidden by default, third telephone action, embedded form/Back, cross-origin form rejection, mobile event cancellation, master checkboxes and analytics suppression.
-- 13 checks in WordPress 7.1 / PHP 8.3.32 Playground: Unicode preservation, sanitization, generic number handling, saved-rule retention, safe public config, metadata and PHP syntax.
-- Browser on WordPress: affected telephone link opens notice; unrelated telephone retains tel:; WhatsApp offers its separate third action.
-- Actual WPForms Lite shortcode renders in popup, accepts a local test submission, and displays its AJAX confirmation. Notifications were disabled for that disposable test form.
-- Browser at desktop and 390x844: form fits; Back restores notice; X closes. Admin third-action checkbox saved off and the frontend hides the third button while retaining X.
-- Anonymous HTTP: active form endpoint 200 with no-store/SAMEORIGIN; unknown rule 404.
+The frontend suite covers contact parsing, notice targeting, language precedence, mobile interception, popup visibility, alternative actions, embedded form behaviour, public-safe analytics labels and generic live-chat/Tawk compatibility.
 
-## Reproducible fast checks
+WordPress PHPUnit tests remain available through `phpunit.xml.dist` when the WordPress core test library is configured.
 
-Run `node tests/frontend.test.cjs`. Run `tests/smoke.sh` where native PHP and Node are installed for PHP lint, JS syntax and the frontend suite. The inline marker check permits only the existing external script-tag attribute rewrite; third-party shortcode output is outside that check.
+## Required staging checks
 
-The PHP files under tests use the WordPress core test library and PHPUnit; set WP_TESTS_DIR and run `phpunit -c phpunit.xml.dist`. That complete PHPUnit suite was not run in this environment.
+Before replacing an existing client installation:
 
-## Required site-specific staging checks
+1. Back up the database and plugin directory.
+2. Upgrade without uninstalling so existing options and analytics remain intact.
+3. Confirm legacy managed-route messages still appear and route correctly.
+4. Purge page/CDN caches and verify `frontend-tracker-1.0.0.js` and `frontend-1.0.0.css` load.
+5. Test affected and unaffected WhatsApp/telephone links on physical iOS and Android devices.
+6. If Polylang is used, verify every configured language and fallback behaviour.
+7. If Live Chat is used, select its provider under Settings and verify the widget plus fallback URL.
+8. Test real shortcode forms, validation, CAPTCHA, confirmation/redirect and mail delivery.
+9. Run a Quick Scan, then verify Recent Changes and Current Page scanning.
+10. Export configuration from staging and import into a disposable WordPress site before using the workflow for multiple clients.
+11. Confirm any delegated role can access/save WhatsApp Tracker settings but does not gain unrelated WordPress administrator privileges.
+12. Publish a GitHub release with a `whatsapp-tracker.zip` asset and verify WordPress update discovery on staging.
 
-1. Upgrade without uninstalling and verify existing rules, routes and analytics.
-2. Purge page/CDN caches. Check the page uses frontend-tracker-3.4.1.js and frontend-3.4.1.css; the form uses notice-form-3.4.1.css.
-3. On physical iOS and Android, test affected and unaffected telephone/WhatsApp links. Test both popup master switches.
-4. With actual Polylang configured, verify each language-specific rule and Default fallback after page-language switching. Language matching has regression coverage; a full Polylang installation was not exercised here.
-5. Test your real shortcode provider, CAPTCHA, validation, privacy consent, confirmation/redirect, mail delivery and any payments in that provider's test mode. Basic WPForms Lite success does not certify all forms.
-6. Verify forms are not cached. Test closing and Back with unsent input, keyboard navigation, and screen-reader interaction.
-7. Run existing scanner/migration workflows on disposable staging data; this release does not re-certify every legacy admin workflow.
-
-No physical-device or production deployment tests were performed for 3.4.1.
+No automated suite replaces client-specific staging, CDN/cache validation or physical-device testing.
