@@ -28,7 +28,7 @@ function awm_emergency_redirect( $notice, $edit_id = '' ) {
 
 add_action( 'admin_post_awm_save_popup_visibility', 'awm_save_popup_visibility' );
 function awm_save_popup_visibility() {
-	if ( ! current_user_can( 'manage_options' ) ) {
+	if ( ! current_user_can( AWM_CAPABILITY ) ) {
 		wp_die( 'Insufficient permissions.' );
 	}
 	check_admin_referer( 'awm_save_popup_visibility' );
@@ -40,7 +40,7 @@ function awm_save_popup_visibility() {
 
 add_action( 'admin_post_awm_save_emergency_rule', 'awm_save_emergency_rule' );
 function awm_save_emergency_rule() {
-	if ( ! current_user_can( 'manage_options' ) ) {
+	if ( ! current_user_can( AWM_CAPABILITY ) ) {
 		wp_die( 'Insufficient permissions.' );
 	}
 	check_admin_referer( 'awm_save_emergency_rule' );
@@ -71,7 +71,7 @@ function awm_save_emergency_rule() {
 
 add_action( 'admin_post_awm_toggle_emergency_rule', 'awm_toggle_emergency_rule' );
 function awm_toggle_emergency_rule() {
-	if ( ! current_user_can( 'manage_options' ) ) {
+	if ( ! current_user_can( AWM_CAPABILITY ) ) {
 		wp_die( 'Insufficient permissions.' );
 	}
 	check_admin_referer( 'awm_toggle_emergency_rule' );
@@ -95,7 +95,7 @@ function awm_toggle_emergency_rule() {
 
 add_action( 'admin_post_awm_delete_emergency_rule', 'awm_delete_emergency_rule' );
 function awm_delete_emergency_rule() {
-	if ( ! current_user_can( 'manage_options' ) ) {
+	if ( ! current_user_can( AWM_CAPABILITY ) ) {
 		wp_die( 'Insufficient permissions.' );
 	}
 	check_admin_referer( 'awm_delete_emergency_rule' );
@@ -131,7 +131,7 @@ function awm_emergency_target_summary( $rule ) {
 }
 
 function awm_emergency_popups_page() {
-	if ( ! current_user_can( 'manage_options' ) ) {
+	if ( ! current_user_can( AWM_CAPABILITY ) ) {
 		return;
 	}
 
