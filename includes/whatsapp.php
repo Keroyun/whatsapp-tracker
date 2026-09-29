@@ -488,6 +488,33 @@ function awm_inventory_status( $parsed ) {
  * Centrally managed WhatsApp routes
  * ---------------------------------------------------------------------- */
 
+function awm_available_languages() {
+	$languages = array();
+	if ( function_exists( 'pll_languages_list' ) ) {
+		$languages = (array) pll_languages_list( array( 'fields' => 'slug' ) );
+	}
+	if ( empty( $languages ) ) {
+		$locale = strtolower( str_replace( '_', '-', (string) get_locale() ) );
+		$primary = sanitize_key( strtok( $locale, '-' ) );
+		if ( $primary ) {
+			$languages[] = $primary;
+		}
+	}
+	$languages = array_values( array_unique( array_filter( array_map( 'sanitize_key', $languages ) ) ) );
+	return apply_filters( 'awm_available_languages', $languages );
+}
+
+function awm_default_language() {
+	if ( function_exists( 'pll_default_language' ) ) {
+		$language = sanitize_key( (string) pll_default_language( 'slug' ) );
+		if ( $language ) {
+			return $language;
+		}
+	}
+	$languages = awm_available_languages();
+	return $languages ? $languages[0] : 'en';
+}
+
 function awm_managed_route_defaults() {
 	return array(
 		'slug'             => '',
@@ -497,9 +524,7 @@ function awm_managed_route_defaults() {
 		'backup_number'    => '',
 		'active_line'      => 'primary',
 		'source_label'     => '',
-		'message_en'       => '',
-		'message_zh'       => '',
-		'message_id'       => '',
+		'messages'         => array(),
 		'fallback_url'     => home_url( '/' ),
 		'updated_at'       => '',
 		'updated_by'       => 0,
@@ -516,10 +541,39 @@ function awm_get_managed_routes() {
 	return is_array( $routes ) ? $routes : array();
 }
 
+function awm_managed_route_messages( $route ) {
+	$route = is_array( $route ) ? $route : array();
+	$messages = isset( $route['messages'] ) && is_array( $route['messages'] ) ? $route['messages'] : array();
+
+	// Backward compatibility with pre-1.0 route fields.
+	foreach ( array( 'en', 'zh', 'id' ) as $legacy_language ) {
+		$legacy_key = 'message_' . $legacy_language;
+		if ( empty( $messages[ $legacy_language ] ) && ! empty( $route[ $legacy_key ] ) ) {
+			$messages[ $legacy_language ] = (string) $route[ $legacy_key ];
+		}
+	}
+
+	$clean = array();
+	foreach ( $messages as $language => $message ) {
+		$language = sanitize_key( (string) $language );
+		if ( ! $language ) { continue; }
+		$message = sanitize_textarea_field( awm_emergency_limit_text( $message, 1000 ) );
+		if ( '' !== trim( $message ) ) {
+			$clean[ $language ] = $message;
+		}
+	}
+	return $clean;
+}
+
 function awm_get_managed_route( $slug ) {
 	$slug   = awm_managed_route_slug( $slug );
 	$routes = awm_get_managed_routes();
-	return isset( $routes[ $slug ] ) && is_array( $routes[ $slug ] ) ? array_merge( awm_managed_route_defaults(), $routes[ $slug ] ) : array();
+	if ( ! isset( $routes[ $slug ] ) || ! is_array( $routes[ $slug ] ) ) {
+		return array();
+	}
+	$route = array_merge( awm_managed_route_defaults(), $routes[ $slug ] );
+	$route['messages'] = awm_managed_route_messages( $route );
+	return $route;
 }
 
 function awm_managed_route_number( $route ) {
@@ -536,7 +590,8 @@ function awm_managed_route_number( $route ) {
 function awm_managed_route_url( $slug, $language = '' ) {
 	$slug = awm_managed_route_slug( $slug );
 	$url  = home_url( '/go/whatsapp/' . rawurlencode( $slug ) . '/' );
-	if ( in_array( $language, array( 'en', 'zh', 'id' ), true ) ) {
+	$language = sanitize_key( (string) $language );
+	if ( $language ) {
 		$url = add_query_arg( 'lang', $language, $url );
 	}
 	return $url;
@@ -545,32 +600,43 @@ function awm_managed_route_url( $slug, $language = '' ) {
 function awm_detect_post_language( $post_id ) {
 	if ( function_exists( 'pll_get_post_language' ) ) {
 		$language = sanitize_key( (string) pll_get_post_language( $post_id, 'slug' ) );
-		if ( in_array( $language, array( 'en', 'zh', 'id' ), true ) ) {
+		if ( $language ) {
 			return $language;
 		}
 	}
 
 	$url  = get_permalink( $post_id );
 	$path = '/' . ltrim( (string) wp_parse_url( $url, PHP_URL_PATH ), '/' );
-	if ( 0 === strpos( $path, '/zh/' ) ) {
-		return 'zh';
+	foreach ( awm_available_languages() as $language ) {
+		if ( 0 === strpos( $path, '/' . $language . '/' ) ) {
+			return $language;
+		}
 	}
-	if ( 0 === strpos( $path, '/id/' ) ) {
-		return 'id';
-	}
-	return 'en';
+	return awm_default_language();
 }
 
 function awm_managed_route_message( $route, $language ) {
-	$language = in_array( $language, array( 'en', 'zh', 'id' ), true ) ? $language : 'en';
-	$message  = trim( (string) ( $route[ 'message_' . $language ] ?? '' ) );
-	if ( '' === $message && 'en' !== $language ) {
-		$message = trim( (string) ( $route['message_en'] ?? '' ) );
+	$messages = awm_managed_route_messages( $route );
+	$language = sanitize_key( (string) $language );
+	$default  = awm_default_language();
+	if ( $language && isset( $messages[ $language ] ) ) {
+		return trim( (string) $messages[ $language ] );
 	}
-	return $message;
+	if ( isset( $messages[ $default ] ) ) {
+		return trim( (string) $messages[ $default ] );
+	}
+	if ( isset( $messages['en'] ) ) {
+		return trim( (string) $messages['en'] );
+	}
+	foreach ( $messages as $message ) {
+		if ( '' !== trim( (string) $message ) ) {
+			return trim( (string) $message );
+		}
+	}
+	return '';
 }
 
-function awm_managed_route_destination_url( $route, $language = 'en' ) {
+function awm_managed_route_destination_url( $route, $language = '' ) {
 	if ( ! is_array( $route ) || '1' !== (string) ( $route['enabled'] ?? '0' ) ) {
 		return '';
 	}
@@ -579,7 +645,7 @@ function awm_managed_route_destination_url( $route, $language = 'en' ) {
 		return '';
 	}
 	$url     = 'https://wa.me/' . rawurlencode( $number );
-	$message = awm_managed_route_message( $route, $language );
+	$message = awm_managed_route_message( $route, $language ?: awm_default_language() );
 	if ( '' !== $message ) {
 		$url .= '?text=' . rawurlencode( $message );
 	}
@@ -639,6 +705,15 @@ function awm_sanitize_managed_route( $input, $existing_slug = '' ) {
 	if ( ! $fallback || ! awm_url_is_same_origin_as_site( $fallback ) ) {
 		$fallback = $defaults['fallback_url'];
 	}
+	$messages = array();
+	if ( isset( $input['messages'] ) && is_array( $input['messages'] ) ) {
+		foreach ( $input['messages'] as $language => $message ) {
+			$language = sanitize_key( (string) $language );
+			if ( $language ) {
+				$messages[ $language ] = sanitize_textarea_field( awm_emergency_limit_text( $message, 1000 ) );
+			}
+		}
+	}
 
 	return array(
 		'slug'             => $slug,
@@ -648,9 +723,7 @@ function awm_sanitize_managed_route( $input, $existing_slug = '' ) {
 		'backup_number'    => $backup,
 		'active_line'      => $active,
 		'source_label'     => sanitize_text_field( awm_emergency_limit_text( $input['source_label'] ?? '', 191 ) ),
-		'message_en'       => sanitize_textarea_field( awm_emergency_limit_text( $input['message_en'] ?? '', 1000 ) ),
-		'message_zh'       => sanitize_textarea_field( awm_emergency_limit_text( $input['message_zh'] ?? '', 1000 ) ),
-		'message_id'       => sanitize_textarea_field( awm_emergency_limit_text( $input['message_id'] ?? '', 1000 ) ),
+		'messages'         => array_filter( $messages, 'strlen' ),
 		'fallback_url'     => $fallback ? $fallback : $defaults['fallback_url'],
 		'updated_at'       => current_time( 'mysql' ),
 		'updated_by'       => get_current_user_id(),
@@ -670,17 +743,22 @@ function awm_managed_route_query_vars( $vars ) {
 
 function awm_managed_route_request_language() {
 	$language = isset( $_GET['lang'] ) ? sanitize_key( wp_unslash( $_GET['lang'] ) ) : '';
-	if ( in_array( $language, array( 'en', 'zh', 'id' ), true ) ) {
+	if ( $language ) {
 		return $language;
 	}
+	if ( function_exists( 'pll_current_language' ) ) {
+		$language = sanitize_key( (string) pll_current_language( 'slug' ) );
+		if ( $language ) {
+			return $language;
+		}
+	}
 	$referer_path = isset( $_SERVER['HTTP_REFERER'] ) ? (string) wp_parse_url( esc_url_raw( wp_unslash( $_SERVER['HTTP_REFERER'] ) ), PHP_URL_PATH ) : '';
-	if ( 0 === strpos( '/' . ltrim( $referer_path, '/' ), '/zh/' ) ) {
-		return 'zh';
+	foreach ( awm_available_languages() as $candidate ) {
+		if ( 0 === strpos( '/' . ltrim( $referer_path, '/' ), '/' . $candidate . '/' ) ) {
+			return $candidate;
+		}
 	}
-	if ( 0 === strpos( '/' . ltrim( $referer_path, '/' ), '/id/' ) ) {
-		return 'id';
-	}
-	return 'en';
+	return awm_default_language();
 }
 
 add_action( 'template_redirect', 'awm_handle_managed_route_redirect', 0 );
@@ -730,7 +808,7 @@ function awm_whatsapp_route_shortcode( $atts ) {
 	if ( 'auto' === $language ) {
 		$language = awm_detect_post_language( get_the_ID() );
 	}
-	$language = in_array( $language, array( 'en', 'zh', 'id' ), true ) ? $language : 'en';
+	$language = $language ? $language : awm_default_language();
 	$source   = sanitize_text_field( (string) ( $route['source_label'] ?? '' ) );
 	$class    = sanitize_html_class( (string) $atts['class'] );
 	return sprintf(
