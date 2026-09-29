@@ -59,7 +59,7 @@ function awm_sanitize_approved_numbers( $value ) {
 }
 
 function awm_settings_page() {
-	if ( ! current_user_can( 'manage_options' ) ) {
+	if ( ! current_user_can( AWM_CAPABILITY ) ) {
 		return;
 	}
 
