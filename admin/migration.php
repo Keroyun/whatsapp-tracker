@@ -383,7 +383,7 @@ function awm_migration_process_item( $item, $direction ) {
 
 function awm_migration_ajax_guard() {
 	check_ajax_referer( 'awm_migration', 'nonce' );
-	if ( ! current_user_can( 'manage_options' ) ) {
+	if ( ! current_user_can( AWM_CAPABILITY ) ) {
 		wp_send_json_error( array( 'message' => 'Insufficient permissions.' ), 403 );
 	}
 }
@@ -518,7 +518,7 @@ function awm_ajax_migration_rollback_batch() {
 
 add_action( 'admin_post_awm_delete_migration_run', 'awm_delete_migration_run' );
 function awm_delete_migration_run() {
-	if ( ! current_user_can( 'manage_options' ) ) {
+	if ( ! current_user_can( AWM_CAPABILITY ) ) {
 		wp_die( 'Insufficient permissions.' );
 	}
 	check_admin_referer( 'awm_delete_migration_run' );
@@ -537,7 +537,7 @@ function awm_delete_migration_run() {
 }
 
 function awm_bulk_migration_page() {
-	if ( ! current_user_can( 'manage_options' ) ) {
+	if ( ! current_user_can( AWM_CAPABILITY ) ) {
 		return;
 	}
 	global $wpdb;
