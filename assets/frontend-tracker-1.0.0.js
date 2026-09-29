@@ -239,6 +239,7 @@
 				emergencyRules = settings.emergencyRules;
 				trackingEnabled = settings.trackingEnabled;
 				popupEnabled = refreshedVisibility;
+				if ( typeof settings.liveChatProvider === 'string' ) cfg.liveChatProvider = settings.liveChatProvider;
 				syncTelephoneLinks();
 				if (modal && !modal.hidden && activeParsed) {
 					var updatedRule = findEmergencyRule(activeParsed);
@@ -432,7 +433,7 @@
 		var popupPayload = {
 			event: parsed.channel === 'telephone' ? 'telephone_emergency_popup' : 'whatsapp_emergency_popup',
 			contact_channel: parsed.channel,
-			emergency_rule: rule.name || rule.id,
+			emergency_rule: rule.analyticsLabel || rule.id,
 			page_path: window.location.pathname
 		};
 		popupPayload[parsed.channel === 'telephone' ? 'telephone_destination' : 'whatsapp_destination'] = parsed.destination || 'unknown';
