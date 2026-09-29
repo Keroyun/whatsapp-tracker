@@ -705,14 +705,14 @@ function awm_sanitize_managed_route( $input, $existing_slug = '' ) {
 	if ( ! $fallback || ! awm_url_is_same_origin_as_site( $fallback ) ) {
 		$fallback = $defaults['fallback_url'];
 	}
-	$messages = array();
-	if ( isset( $input['messages'] ) && is_array( $input['messages'] ) ) {
-		foreach ( $input['messages'] as $language => $message ) {
-			$language = sanitize_key( (string) $language );
-			if ( $language ) {
-				$messages[ $language ] = sanitize_textarea_field( awm_emergency_limit_text( $message, 1000 ) );
-			}
+	$messages = awm_managed_route_messages( $input );
+	foreach ( $messages as $language => $message ) {
+		$language = sanitize_key( (string) $language );
+		if ( ! $language ) {
+			unset( $messages[ $language ] );
+			continue;
 		}
+		$messages[ $language ] = sanitize_textarea_field( awm_emergency_limit_text( $message, 1000 ) );
 	}
 
 	return array(
