@@ -13,7 +13,8 @@ This release resets the public product version to 1.0.0 and converts the project
 - Add portable configuration export/import with validation and sanitization.
 - Add optional lightweight Daily/Weekly Recent Changes scans while keeping Deep Scan manual.
 - Add plugin health reporting to the dashboard.
-- Add GitHub release update support and Update URI metadata.
+- Add GitHub release update support and Update URI metadata; updater accepts only the clean `whatsapp-tracker.zip` release asset and fails closed when it is missing.
+- Require PHP 7.4+ and always disable object instantiation when decoding serialized migration backups.
 - Correct uninstall cleanup for rate-limit transients and scheduled tasks.
 - Remove superseded runtime assets and use cache-safe 1.0.0 filenames.
 - Preserve the 3.4.1 form-isolation, popup, analytics, inventory, migration and security improvements.

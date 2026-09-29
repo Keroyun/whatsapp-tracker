@@ -31,12 +31,14 @@ function awm_github_latest_release( $force = false ) {
 	$package = '';
 	foreach ( (array) ( $data['assets'] ?? array() ) as $asset ) {
 		if ( isset( $asset['name'], $asset['browser_download_url'] ) && 'whatsapp-tracker.zip' === strtolower( (string) $asset['name'] ) ) {
-			$package = esc_url_raw( $asset['browser_download_url'] );
-			break;
+			$candidate = esc_url_raw( $asset['browser_download_url'] );
+			$parts = wp_parse_url( $candidate );
+			$path = isset( $parts['path'] ) ? (string) $parts['path'] : '';
+			if ( 'https' === ( $parts['scheme'] ?? '' ) && 'github.com' === strtolower( (string) ( $parts['host'] ?? '' ) ) && 0 === strpos( $path, '/Keroyun/whatsapp-tracker/releases/download/' ) ) {
+				$package = $candidate;
+				break;
+			}
 		}
-	}
-	if ( ! $package && ! empty( $data['zipball_url'] ) ) {
-		$package = esc_url_raw( $data['zipball_url'] );
 	}
 	$release = array(
 		'version' => ltrim( sanitize_text_field( (string) $data['tag_name'] ), 'vV' ),
@@ -66,30 +68,4 @@ function awm_github_update( $update, $plugin_data, $plugin_file, $locales ) {
 		'tested' => '',
 		'requires_php' => '',
 	);
-}
-
-/**
- * GitHub source archives include owner/tag in the directory name. Normalize it
- * back to whatsapp-tracker so WordPress upgrades the existing plugin in place.
- */
-add_filter( 'upgrader_source_selection', 'awm_normalize_github_source', 10, 4 );
-function awm_normalize_github_source( $source, $remote_source, $upgrader, $hook_extra ) {
-	if ( empty( $hook_extra['plugin'] ) || plugin_basename( AWM_PLUGIN_FILE ) !== $hook_extra['plugin'] ) {
-		return $source;
-	}
-	global $wp_filesystem;
-	if ( ! $wp_filesystem || ! is_string( $source ) || ! $wp_filesystem->is_dir( $source ) ) {
-		return $source;
-	}
-	$desired = trailingslashit( $remote_source ) . 'whatsapp-tracker/';
-	if ( untrailingslashit( $source ) === untrailingslashit( $desired ) ) {
-		return $source;
-	}
-	if ( $wp_filesystem->exists( $desired ) ) {
-		$wp_filesystem->delete( $desired, true );
-	}
-	if ( $wp_filesystem->move( $source, $desired, true ) ) {
-		return $desired;
-	}
-	return new WP_Error( 'awm_update_source', 'Unable to normalize the GitHub plugin directory during update.' );
 }

@@ -3,6 +3,7 @@
  * Plugin Name: WhatsApp Tracker
  * Description: Central WhatsApp routes, safe bulk migration, WhatsApp and telephone service notices, click analytics, source attribution, link inventory scanning, wa.link resolution and approved-number governance.
  * Version: 1.0.0
+ * Requires PHP: 7.4
  * Author: Khairul Azhar
  * Author URI: https://khairulazhar.com
  * Plugin URI: https://khairulazhar.com/my-plugins-and-tools/

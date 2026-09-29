@@ -28,7 +28,7 @@ Internal administrator rule names are not included in public notice configuratio
 
 - Tawk.to support is optional and provider-neutral at the rule level; WhatsApp Tracker does not install or inject the Tawk widget.
 - Shortcode form providers remain responsible for form validation, storage, consent, CAPTCHA and downstream processing.
-- GitHub release checks make bounded HTTPS requests to the public GitHub API and cache the response.
+- GitHub release checks make bounded HTTPS requests to the public GitHub API and cache the response. Updates accept only an HTTPS `whatsapp-tracker.zip` release asset hosted under this repository's GitHub release path; source-archive fallback is disabled.
 
 ## Scanning and migration
 
