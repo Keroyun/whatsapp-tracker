@@ -1,143 +1,151 @@
 # WhatsApp Tracker
 
-A WordPress plugin for managing WhatsApp contact links, measuring link engagement, and displaying configurable service notices for WhatsApp and telephone links.
+A reusable WordPress plugin for managing WhatsApp contact links, aggregate click analytics, central routes, link inventory, safe migrations, and configurable WhatsApp/telephone service notices.
 
-**Version:** 3.4.1 · **Author:** [Azhar](https://github.com/Keroyun) · **Website:** [khairulazhar.com](https://khairulazhar.com) · **License:** GPL-2.0-or-later
+**Version:** 1.0.0 · **Author:** [Khairul Azhar](https://khairulazhar.com) · **Plugin page:** [My Plugins & Tools](https://khairulazhar.com/my-plugins-and-tools/) · **License:** GPL-2.0-or-later
 
-This is a website contact-link tool. It does not connect to a WhatsApp account, read chats, monitor conversations, or access private messages.
+This plugin manages website contact links only. It does not connect to a WhatsApp account, read chats, monitor conversations, or access private messages.
 
-## Features
+## Highlights
 
-- Aggregate WhatsApp click analytics, page-level reporting, source attribution and CSV exports.
-- Approved-number labels and an on-demand link inventory scanner.
-- Administrator-triggered `wa.link` resolution with bounded requests.
-- Central WhatsApp routes with primary/backup numbers and same-site fallback URLs.
-- Bulk link migration with previews, backups and conflict-aware rollback.
-- Targeted WhatsApp/telephone service notices, independently enabled per channel.
-- Optional third popup action: another link, a telephone number or a shortcode form.
-- Polylang page-language matching for notices, with a Default fallback.
-- Administrative audit history, configurable retention and opt-in uninstall cleanup.
-
-## Technical requirements
-
-- A working WordPress installation with its REST API accessible and administrator access for configuration.
-- A PHP/WordPress combination supported by your host. The release was exercised with **WordPress 7.1 and PHP 8.3.32** in WordPress Playground; other combinations are not certified by those tests.
-- A WordPress-compatible database. Production SQL uses MySQL/MariaDB conventions; the local Playground checks used its SQLite compatibility layer.
-- JavaScript enabled in the visitor's browser; working rewrite rules/permalinks for central routes.
-- Outbound HTTPS for optional shortlink resolution; loopback access for deep scanning. PHP DOM support improves HTML scanning.
-- Optional: Polylang, an installed shortcode-form provider, or a Tawk.to widget for their respective integrations. None is bundled.
-
-No Node.js, npm, build step, WhatsApp API token or Meta application is needed to run the plugin. Node.js is only used for development tests.
+- Aggregate WhatsApp click analytics, page reporting, source attribution and CSV export.
+- Approved-number governance plus on-demand Quick/Deep inventory scans.
+- Optional Daily/Weekly **Recent Changes** scan; rendered-page Deep Scan always remains manual.
+- Central WhatsApp routes with primary/backup lines and language-specific messages.
+- Dynamic route languages from Polylang, with site-locale fallback when Polylang is absent.
+- Safe bulk migration to central routes with preview, backup and conflict-aware rollback.
+- Configurable WhatsApp/telephone availability notices with independent channel switches.
+- Provider-neutral **Live Chat** action; Tawk.to is available as an optional integration.
+- Optional URL/telephone/form action in notices.
+- Dedicated `manage_whatsapp_tracker` capability so access can be delegated without full Administrator rights.
+- Portable JSON configuration export/import for reuse across client websites.
+- Dashboard health summary for unknown links, unresolved shortlinks, backup routes and scan state.
+- GitHub release update support via the plugin's Update URI.
+- Audit history, configurable retention and opt-in uninstall cleanup.
 
 ## Installation
 
-### From source
+Download or clone this repository into `wp-content/plugins/whatsapp-tracker`, then activate **WhatsApp Tracker**.
 
-```sh
-git clone https://github.com/Keroyun/whatsapp-tracker.git
-```
+For production releases, install the `whatsapp-tracker.zip` asset attached to a GitHub release when available.
 
-Copy the `whatsapp-tracker` directory into `wp-content/plugins/`, then activate **WhatsApp Tracker** in WordPress → Plugins. Do not place WordPress itself or its database/configuration inside this repository.
+## First-time setup
 
-### From a ZIP
+1. Open **WhatsApp Tracker → Settings**.
+2. Review tracking and retention.
+3. Add the site's approved WhatsApp numbers.
+4. Choose a live-chat provider only if the website already loads that provider.
+5. Optionally grant plugin access to selected WordPress roles.
+6. Run **Link Inventory → Quick Scan** to create the initial inventory checkpoint.
+7. Optionally enable Daily or Weekly **Recent Changes** scans.
+8. Configure Central Routes or service notices as required.
 
-Download the source ZIP from GitHub, extract it and rename its top-level directory to `whatsapp-tracker`. Upload that directory to `wp-content/plugins/`, or re-zip it as `whatsapp-tracker.zip` and use Plugins → Add Plugin → Upload Plugin.
+## Reusing the setup on another client site
 
-For upgrades, back up your site and replace the existing plugin. Do not uninstall first: uninstall may remove stored data if its delete-data option was enabled. Purge page/CDN caches after replacing files so pages load the new versioned frontend JavaScript and CSS.
+Use **WhatsApp Tracker → Tools → Export Configuration**.
 
-## Usage
+The export contains portable configuration such as approved numbers, routes, notice rules, retention, access roles and scan settings. It intentionally excludes:
 
-### Configure analytics and approved destinations
+- click analytics
+- inventory scan results
+- audit logs
+- migration history/backups
+- visitor data
 
-Open **WhatsApp Tracker → Settings**, set tracking and retention preferences, and enter your own approved contact destinations. Labels may share a destination; use source tags for distinct attribution. Telephone events are emitted to an existing `dataLayer` only; they are not stored in the WhatsApp analytics dashboard. Consent/tag configuration is the site owner's responsibility.
+On the destination website, use **Tools → Import Configuration**. Imported values are passed through the plugin's normal sanitizers before they are stored.
 
-### Generate links and central routes
+## Central routes and languages
 
-Use **Link Generator** for a direct WhatsApp link. Use **Central Routes** for a reusable route whose destination can later be switched without editing every page:
+A central route gives the website a stable URL whose destination number can be changed later without editing every CTA.
+
+Example:
 
 ```text
 [whatsapp-route route="support" title="Contact support"]
 ```
 
-Create the `support` route before using this example. The legacy `[whatsapp-link]` shortcode is also supported. Route message fields currently use `en`, `zh` and `id`; this legacy route feature is separate from the more general notice-language selector.
+When Polylang is installed, route message fields are generated from the site's configured languages. Without Polylang, the WordPress site locale is used as the default language. Older `message_en`, `message_zh` and `message_id` route data is read for backward compatibility and is migrated into the generic message structure when saved.
 
-### Display a service notice
+Country codes are never guessed.
 
-1. Open **Emergency Popups** and add a WhatsApp or telephone notice.
-2. Enter your affected destinations and, optionally, page paths or exact links.
-3. Use **Match all** to require both the specified page and destination. **Match any** allows either group to trigger; a matching page can therefore affect every supported link on that page.
-4. Enter your own title, message and alternative actions, then enable the rule and its channel's visibility checkbox.
-5. Test affected and unaffected links on desktop and a physical mobile device.
+## Contact availability notices
 
-Telephone calls use `tel:`; WhatsApp uses a WhatsApp URL. Country codes are not guessed: explicitly include each local/international form present on your pages. Short emergency/service numbers are not intercepted. Add `data-awm-emergency-exempt="1"` to a link that must bypass notices.
+Notices can target WhatsApp, telephone, or both. Rules can match by page path, destination, exact link and language.
 
-### Optional third button and forms
+The **Rule Name** is administrator-only. Frontend analytics receive a separate public-safe **Analytics Label** instead.
 
-Tick **Show a third action button**, set its label and choose a URL/telephone action or a shortcode such as `[wpforms id="123"]` from an installed form provider. The X remains available to close the popup; Back returns from the form to the notice. Closing or returning discards unfinished form input.
+The Live Chat action is provider-neutral. In 1.0.0, Tawk.to can be selected under Settings; the plugin does not inject the Tawk widget itself.
 
-Forms render in a same-origin, form-only document. Only the shortcode provider's head/footer/enqueue callbacks and WordPress asset printers run there; unrelated site chat widgets, popups, theme chrome and sticky footers are excluded. This is request-local: the parent website retains its normal widgets. Form styles and scripts, including registered dependencies, are retained without hiding arbitrary iframes or CAPTCHA elements.
+Short emergency/service telephone numbers are never intercepted. Add `data-awm-emergency-exempt="1"` to any link that must always bypass notice handling.
 
-The form provider owns validation, storage, email and consent. Test CAPTCHA, confirmation redirects and other provider-specific behavior. Theme styling and separate add-on plugins are not automatically included; developers can explicitly opt in the needed provider directory/file using the `awm_notice_form_provider_roots` filter. A shortcode registered in a theme/custom file retains callbacks from that file only. For a page-dependent form, use its normal page URL instead. Never embed private/admin-only content in this public popup. Provider-emitted content is trusted, so this separation is not a security sandbox and cannot remove a widget intentionally emitted by the form provider itself.
+## Scanning
 
-### Languages
+- **Quick Scan:** database/content scan; lightweight and manual.
+- **Deep Scan:** rendered-page HTTP scan; deliberately manual.
+- **Recent Changes:** only content modified since the inventory checkpoint.
+- **Current Page:** rendered scan for one selected page.
 
-Enter popup text in any language. **Default / All languages** supplies fallback content. With Polylang configured, create translated rules and select their page languages. Among matching rules, a current-language rule takes precedence over Default; specificity and priority resolve ties within that scope.
+Scheduled Recent Changes scanning is off by default. A scheduled run stops and requests manual review when more than 100 changed content items are pending, avoiding an unexpectedly heavy cron task on shared hosting.
 
-There is no automatic translation or device-language guessing. Without a detected Polylang language, only Default rules apply. WPML is not integrated. Marked notice-editor strings use the `whatsapp-tracker` text domain; language packs are not bundled and legacy admin screens are not fully internationalized.
+## Permissions
 
-### Scanning and migration
-
-Run **Link Inventory** on demand. Preview **Bulk Migration** changes before applying them, and keep an independent backup. Migration backups can contain full original content and metadata, including private content; never publish database exports or migration records.
-
-## Caching
-
-- Exclude `whatsapp-tracker/assets/frontend-tracker` from JavaScript delay/defer tools.
-- Do not cache `/wp-json/whatsapp-tracker/v1/emergency-rules` or requests containing `awm_notice_form`.
-- Never cache form security tokens. Review additional cache rules with your form provider.
-- The plugin has LiteSpeed integration hooks, but other CDN/cache products require site-specific configuration.
-
-## Project structure
+The plugin uses the custom capability:
 
 ```text
-whatsapp-tracker.php   Plugin bootstrap, metadata and constants
-includes/             Rules, routing, database, tracking and security helpers
-admin/                WordPress management screens and administrative handlers
-assets/               Runtime JavaScript and CSS (no build step)
-languages/            Notice-editor translation template
-tests/                Synthetic frontend and WordPress PHPUnit tests
-uninstall.php         Optional plugin-owned data cleanup
-phpunit.xml.dist       Portable PHPUnit configuration
-TESTING.md            Verification scope and staging checklist
-SECURITY.md           Privacy boundaries and reporting guidance
-LICENSE               GNU General Public License, version 2
+manage_whatsapp_tracker
 ```
+
+Administrators always retain it. Additional roles can be selected in Settings.
+
+## GitHub updates
+
+The plugin header uses:
+
+```text
+Update URI: https://github.com/Keroyun/whatsapp-tracker
+```
+
+The updater checks the latest public GitHub release. It prefers a release asset named exactly:
+
+```text
+whatsapp-tracker.zip
+```
+
+If that asset is unavailable, the GitHub release source archive is used and normalized to the `whatsapp-tracker` plugin directory during installation.
 
 ## Security and privacy
 
-- This repository contains source code and synthetic fixtures, not production settings, databases, conversation exports or credentials. Test/example telephone values use fictional-number ranges; invalid values and short service codes exist solely to test validation.
-- Installed-site analytics store daily counts, paths, destinations, source labels, link text and first/last activity timestamps. They do not store WhatsApp conversation contents.
-- Raw IP/user-agent values are used to derive a keyed rate-limit identifier, not stored in the plugin's analytics tables. Web-server logs and other plugins may still record them.
-- Inventory records retain link URLs, which may include prefilled message text. Migration backups retain original values; audit records include administrator IDs and bounded context. Treat your database and exports as potentially sensitive.
-- Active notices and configured frontend contact destinations are public display data. Language/page targeting is not authorization or a way to keep a number secret.
-- New installations enable tracking by default. Configure it and any required consent before exposing the site to visitors. Default analytics/audit retention is 365 days, with scheduled cleanup dependent on WordPress cron.
-- Uninstall preserves data unless the administrator explicitly opts into deletion. Other retention/backup obligations remain with the site owner.
-- Never commit `.env`, `wp-config.php`, credentials, database dumps, real contact fixtures, logs or captured site content. `.gitignore` is a safeguard, not a secret scanner.
+- State-changing admin actions use capability and nonce checks.
+- Public tracking applies origin, content-type, request-size and rate-limit controls.
+- Raw visitor IP/user-agent values are not stored in analytics tables.
+- Analytics are aggregated rather than stored as one database row per click.
+- Shortlink resolution is administrator-triggered and bounded to supported WhatsApp URLs.
+- Import files are size-limited and validated/sanitized before options are updated.
+- Deep scanning remains manual.
+- Uninstall preserves plugin data unless deletion is explicitly enabled.
+- Public notice configuration contains only information required by the browser; internal rule names are not exposed.
 
-See [SECURITY.md](SECURITY.md) for more detail. This review is not a penetration-test certification.
+Inventory links may contain prefilled message text and migration backups may contain original page/meta values. Treat database backups and exports as potentially sensitive.
 
-## Development and validation
+See [SECURITY.md](SECURITY.md) for more detail.
+
+## Development checks
 
 ```sh
 node tests/frontend.test.cjs
 bash tests/smoke.sh
 ```
 
-The smoke script additionally requires PHP on PATH. To run the PHP unit tests, install a compatible PHPUnit and the WordPress core test library, set `WP_TESTS_DIR`, then run `phpunit -c phpunit.xml.dist` against a disposable test database.
+The smoke suite runs PHP syntax checks, JavaScript syntax checks and frontend regression tests. WordPress PHPUnit tests require the WordPress test library and a disposable test database.
 
-See [TESTING.md](TESTING.md) for completed checks and limitations. Physical devices, live Polylang configuration, other form providers and production hosting require staging validation.
+## Project links
 
-## License and disclaimer
+- Repository: https://github.com/Keroyun/whatsapp-tracker
+- Author: https://khairulazhar.com
+- Plugin page: https://khairulazhar.com/my-plugins-and-tools/
 
-Licensed under **GPL-2.0-or-later**, preserving the plugin's existing license declaration. See [LICENSE](LICENSE).
+## License and trademark notice
 
-WhatsApp Tracker is an independent project and is **not affiliated with, endorsed by, or sponsored by WhatsApp or Meta**. WhatsApp and Meta names and marks belong to their respective owners. The plugin controls website links only; it cannot prevent calls or messages made outside the website.
+Licensed under **GPL-2.0-or-later**.
+
+WhatsApp Tracker is an independent project and is not affiliated with, endorsed by, or sponsored by WhatsApp or Meta. WhatsApp and Meta names and marks belong to their respective owners.
