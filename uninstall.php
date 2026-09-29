@@ -8,6 +8,7 @@ function awm_uninstall_current_site_data() {
 		$role = get_role( $role_name );
 		if ( $role ) { $role->remove_cap( 'manage_whatsapp_tracker' ); }
 	}
+	wp_clear_scheduled_hook( 'awm_daily_cleanup' );
 	wp_clear_scheduled_hook( 'awm_scheduled_recent_scan' );
 
 	if ( '1' !== (string) get_option( 'awm_delete_data_on_uninstall', '0' ) ) {
@@ -39,7 +40,6 @@ function awm_uninstall_current_site_data() {
 	$like_rl    = $wpdb->esc_like( '_transient_awm_rl_' ) . '%';
 	$like_rlt   = $wpdb->esc_like( '_transient_timeout_awm_rl_' ) . '%';
 	$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s", $like_locks, $like_rl, $like_rlt ) );
-	wp_clear_scheduled_hook( 'awm_daily_cleanup' );
 }
 
 if ( is_multisite() ) {
