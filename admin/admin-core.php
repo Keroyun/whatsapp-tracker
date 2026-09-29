@@ -26,6 +26,7 @@ function awm_admin_menu() {
 	add_submenu_page( AWM_MENU_SLUG, 'Link Generator', 'Link Generator', AWM_CAPABILITY, 'awm-generator', 'awm_generator_page' );
 	add_submenu_page( AWM_MENU_SLUG, 'Audit Log', 'Audit Log', AWM_CAPABILITY, 'awm-audit', 'awm_audit_log_page' );
 	add_submenu_page( AWM_MENU_SLUG, 'Settings', 'Settings', AWM_CAPABILITY, 'awm-settings', 'awm_settings_page' );
+	add_submenu_page( AWM_MENU_SLUG, 'Tools', 'Tools', AWM_CAPABILITY, 'awm-tools', 'awm_tools_page' );
 }
 
 /**
@@ -41,7 +42,7 @@ function awm_is_plugin_admin_page() {
 		return false;
 	}
 	$page = sanitize_key( wp_unslash( $_GET['page'] ) );
-	return in_array( $page, array( AWM_MENU_SLUG, 'awm-pages', 'awm-routes', 'awm-migration', 'awm-emergency', 'awm-inventory', 'awm-generator', 'awm-audit', 'awm-settings' ), true );
+	return in_array( $page, array( AWM_MENU_SLUG, 'awm-pages', 'awm-routes', 'awm-migration', 'awm-emergency', 'awm-inventory', 'awm-generator', 'awm-audit', 'awm-settings', 'awm-tools' ), true );
 }
 
 
@@ -111,6 +112,7 @@ function awm_dashboard_page() {
 	$approved    = awm_approved_number_map();
 	$approved_entries = awm_get_approved_numbers();
 	$active_emergency_rules = awm_get_active_emergency_rules();
+	$health = awm_health_summary();
 
 	$top_destinations = array();
 	$top_pages        = array();
@@ -129,6 +131,20 @@ function awm_dashboard_page() {
 			<div class="awm-warning"><strong>Emergency popup mode is active:</strong> <?php echo esc_html( number_format_i18n( count( $active_emergency_rules ) ) ); ?> rule(s) may divert matching WhatsApp or telephone clicks. <a href="<?php echo esc_url( admin_url( 'admin.php?page=awm-emergency' ) ); ?>">Review emergency popups</a>.</div>
 		<?php endif; ?>
 		<p><a class="button" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=awm_export_clicks' ), 'awm_export_clicks' ) ); ?>">Export Click Analytics CSV</a></p>
+
+		<div class="awm-card awm-mt18">
+			<h2>Plugin Health</h2>
+			<div class="awm-table-wrap"><table class="widefat striped"><tbody>
+				<tr><th>Tracking</th><td><?php echo $health['tracking'] ? 'Enabled' : 'Disabled'; ?></td></tr>
+				<tr><th>Approved numbers</th><td><?php echo esc_html( number_format_i18n( $health['approved_numbers'] ) ); ?></td></tr>
+				<tr><th>Unknown inventory links</th><td><?php echo esc_html( number_format_i18n( $health['unknown_links'] ) ); ?></td></tr>
+				<tr><th>Unresolved wa.link entries</th><td><?php echo esc_html( number_format_i18n( $health['unresolved_shortlinks'] ) ); ?></td></tr>
+				<tr><th>Routes using backup line</th><td><?php echo esc_html( number_format_i18n( $health['backup_routes'] ) ); ?></td></tr>
+				<tr><th>Active contact notices</th><td><?php echo esc_html( number_format_i18n( $health['active_notices'] ) ); ?></td></tr>
+				<tr><th>Last inventory update</th><td><?php echo esc_html( $health['last_scan'] ?: 'Never' ); ?></td></tr>
+				<tr><th>Scheduled Recent Changes</th><td><?php echo esc_html( ucfirst( $health['scheduled_frequency'] ) ); ?><?php if ( ! empty( $health['scheduled_status']['message'] ) ) : ?> — <?php echo esc_html( $health['scheduled_status']['message'] ); ?><?php endif; ?></td></tr>
+			</tbody></table></div>
+		</div>
 
 		<div class="awm-grid">
 			<div class="awm-card"><div class="awm-muted">Clicks Today</div><div class="awm-metric"><?php echo esc_html( number_format_i18n( $metrics['today'] ) ); ?></div></div>
