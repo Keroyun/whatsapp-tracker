@@ -10,22 +10,22 @@ function awm_admin_menu() {
 	add_menu_page(
 		'WhatsApp Tracker',
 		'WhatsApp Tracker',
-		'manage_options',
+		AWM_CAPABILITY,
 		AWM_MENU_SLUG,
 		'awm_dashboard_page',
 		'dashicons-format-chat',
 		58
 	);
 
-	add_submenu_page( AWM_MENU_SLUG, 'Dashboard', 'Dashboard', 'manage_options', AWM_MENU_SLUG, 'awm_dashboard_page' );
-	add_submenu_page( AWM_MENU_SLUG, 'Page Analytics', 'Page Analytics', 'manage_options', 'awm-pages', 'awm_page_analytics_page' );
-	add_submenu_page( AWM_MENU_SLUG, 'Central Routes', 'Central Routes', 'manage_options', 'awm-routes', 'awm_managed_routes_page' );
-	add_submenu_page( AWM_MENU_SLUG, 'Bulk Migration', 'Bulk Migration', 'manage_options', 'awm-migration', 'awm_bulk_migration_page' );
-	add_submenu_page( AWM_MENU_SLUG, 'Emergency Popups', 'Emergency Popups', 'manage_options', 'awm-emergency', 'awm_emergency_popups_page' );
-	add_submenu_page( AWM_MENU_SLUG, 'Link Inventory', 'Link Inventory', 'manage_options', 'awm-inventory', 'awm_inventory_page' );
-	add_submenu_page( AWM_MENU_SLUG, 'Link Generator', 'Link Generator', 'manage_options', 'awm-generator', 'awm_generator_page' );
-	add_submenu_page( AWM_MENU_SLUG, 'Audit Log', 'Audit Log', 'manage_options', 'awm-audit', 'awm_audit_log_page' );
-	add_submenu_page( AWM_MENU_SLUG, 'Settings', 'Settings', 'manage_options', 'awm-settings', 'awm_settings_page' );
+	add_submenu_page( AWM_MENU_SLUG, 'Dashboard', 'Dashboard', AWM_CAPABILITY, AWM_MENU_SLUG, 'awm_dashboard_page' );
+	add_submenu_page( AWM_MENU_SLUG, 'Page Analytics', 'Page Analytics', AWM_CAPABILITY, 'awm-pages', 'awm_page_analytics_page' );
+	add_submenu_page( AWM_MENU_SLUG, 'Central Routes', 'Central Routes', AWM_CAPABILITY, 'awm-routes', 'awm_managed_routes_page' );
+	add_submenu_page( AWM_MENU_SLUG, 'Bulk Migration', 'Bulk Migration', AWM_CAPABILITY, 'awm-migration', 'awm_bulk_migration_page' );
+	add_submenu_page( AWM_MENU_SLUG, 'Emergency Popups', 'Emergency Popups', AWM_CAPABILITY, 'awm-emergency', 'awm_emergency_popups_page' );
+	add_submenu_page( AWM_MENU_SLUG, 'Link Inventory', 'Link Inventory', AWM_CAPABILITY, 'awm-inventory', 'awm_inventory_page' );
+	add_submenu_page( AWM_MENU_SLUG, 'Link Generator', 'Link Generator', AWM_CAPABILITY, 'awm-generator', 'awm_generator_page' );
+	add_submenu_page( AWM_MENU_SLUG, 'Audit Log', 'Audit Log', AWM_CAPABILITY, 'awm-audit', 'awm_audit_log_page' );
+	add_submenu_page( AWM_MENU_SLUG, 'Settings', 'Settings', AWM_CAPABILITY, 'awm-settings', 'awm_settings_page' );
 }
 
 /**
@@ -99,7 +99,7 @@ function awm_legacy_table_detected() {
 }
 
 function awm_dashboard_page() {
-	if ( ! current_user_can( 'manage_options' ) ) {
+	if ( ! current_user_can( AWM_CAPABILITY ) ) {
 		return;
 	}
 
@@ -395,7 +395,7 @@ function awm_page_analytics_filter_args( $filters ) {
 }
 
 function awm_page_analytics_page() {
-	if ( ! current_user_can( 'manage_options' ) ) {
+	if ( ! current_user_can( AWM_CAPABILITY ) ) {
 		return;
 	}
 
@@ -517,7 +517,7 @@ function awm_csv_safe_cell( $value ) {
 
 add_action( 'admin_post_awm_export_page_analytics', 'awm_export_page_analytics_csv' );
 function awm_export_page_analytics_csv() {
-	if ( ! current_user_can( 'manage_options' ) ) {
+	if ( ! current_user_can( AWM_CAPABILITY ) ) {
 		wp_die( 'Insufficient permissions.' );
 	}
 	check_admin_referer( 'awm_export_page_analytics' );
@@ -564,7 +564,7 @@ function awm_export_page_analytics_csv() {
 
 add_action( 'admin_post_awm_export_clicks', 'awm_export_clicks_csv' );
 function awm_export_clicks_csv() {
-	if ( ! current_user_can( 'manage_options' ) ) {
+	if ( ! current_user_can( AWM_CAPABILITY ) ) {
 		wp_die( 'Insufficient permissions.' );
 	}
 	check_admin_referer( 'awm_export_clicks' );
@@ -612,7 +612,7 @@ function awm_export_clicks_csv() {
 
 add_action( 'admin_post_awm_export_inventory', 'awm_export_inventory_csv' );
 function awm_export_inventory_csv() {
-	if ( ! current_user_can( 'manage_options' ) ) {
+	if ( ! current_user_can( AWM_CAPABILITY ) ) {
 		wp_die( 'Insufficient permissions.' );
 	}
 	check_admin_referer( 'awm_export_inventory' );
