@@ -5,6 +5,11 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
  * Settings
  * ---------------------------------------------------------------------- */
 
+add_filter( 'option_page_capability_awm_settings', 'awm_settings_capability' );
+function awm_settings_capability() {
+	return AWM_CAPABILITY;
+}
+
 add_action( 'admin_init', 'awm_register_settings' );
 function awm_register_settings() {
 	register_setting( 'awm_settings', 'awm_tracking_enabled', array( 'sanitize_callback' => 'awm_sanitize_checkbox' ) );
