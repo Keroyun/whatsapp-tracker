@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   package:
@@ -98,3 +98,54 @@ jobs:
             build/whatsapp-tracker.zip.sha256
           if-no-files-found: error
           retention-days: 14
+
+      - name: Publish v1.0.0 release if missing
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if gh release view v1.0.0 >/dev/null 2>&1; then
+            echo "v1.0.0 already exists; leaving published release unchanged."
+            exit 0
+          fi
+
+          cat > build/release-notes.md <<'EOF'
+          ## WhatsApp Tracker v1.0.0
+
+          First generic public release of WhatsApp Tracker for WordPress.
+
+          ### Highlights
+          - Aggregate WhatsApp click analytics and source attribution
+          - Central WhatsApp routes with primary/backup numbers
+          - Dynamic language messages with Polylang support
+          - Link inventory scanning and safe bulk migration/rollback
+          - WhatsApp and telephone service notices
+          - Provider-neutral live chat action with optional Tawk.to support
+          - Portable configuration export/import
+          - Delegated WordPress role access via `manage_whatsapp_tracker`
+          - Optional lightweight Recent Changes scans
+          - Dashboard health checks and audit history
+          - GitHub-based plugin updates using the official release ZIP
+
+          ### Security / packaging
+          - Production package excludes tests, CI files, backups, exports and development artifacts
+          - No client-specific Beacon Hospital data, credentials, API keys or GTM container IDs
+          - Official updater accepts only this repository's `whatsapp-tracker.zip` release asset
+          - PHP 7.4+ required
+          - Serialized migration backups are restored with object instantiation disabled
+
+          **Author:** Khairul Azhar  
+          **Plugin page:** https://khairulazhar.com/my-plugins-and-tools/
+
+          WhatsApp Tracker is an independent project and is not affiliated with WhatsApp or Meta.
+          EOF
+
+          gh release create v1.0.0 \
+            build/whatsapp-tracker.zip \
+            build/whatsapp-tracker.zip.sha256 \
+            --target "${GITHUB_SHA}" \
+            --title "WhatsApp Tracker v1.0.0" \
+            --notes-file build/release-notes.md \
+            --latest
