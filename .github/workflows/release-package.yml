@@ -68,8 +68,11 @@ jobs:
           find build/whatsapp-tracker -type f -name '.DS_Store' -delete
           find build/whatsapp-tracker -type f -name '*.map' -delete
 
+          # Normalize mtimes and archive ordering so identical source produces
+          # the same release checksum across repeated builds.
+          find build/whatsapp-tracker -exec touch -t 198001010000.00 {} +
           cd build
-          zip -qr whatsapp-tracker.zip whatsapp-tracker
+          find whatsapp-tracker -print | LC_ALL=C sort | zip -X -q whatsapp-tracker.zip -@
           sha256sum whatsapp-tracker.zip > whatsapp-tracker.zip.sha256
 
       - name: Verify production archive
