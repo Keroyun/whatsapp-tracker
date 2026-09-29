@@ -85,11 +85,41 @@ function awm_import_configuration() {
 				$value = in_array( sanitize_key( $value ), array( 'off', 'daily', 'weekly' ), true ) ? sanitize_key( $value ) : 'off';
 				break;
 			case 'awm_approved_numbers':
-				if ( ! is_array( $value ) ) { $value = array(); }
+				$clean_numbers = array();
+				foreach ( is_array( $value ) ? $value : array() as $item ) {
+					if ( ! is_array( $item ) ) { continue; }
+					$number = awm_normalize_phone( $item['number'] ?? '' );
+					if ( ! $number ) { continue; }
+					$clean_numbers[] = array(
+						'label' => sanitize_text_field( awm_emergency_limit_text( $item['label'] ?? 'Approved Number', 191 ) ),
+						'number' => $number,
+					);
+				}
+				$value = $clean_numbers;
 				break;
 			case 'awm_managed_routes':
+				$clean_routes = array();
+				foreach ( is_array( $value ) ? $value : array() as $slug => $route ) {
+					if ( ! is_array( $route ) ) { continue; }
+					$slug = awm_managed_route_slug( $slug ?: ( $route['slug'] ?? '' ) );
+					if ( ! $slug ) { continue; }
+					$route['slug'] = $slug;
+					$clean = awm_sanitize_managed_route( $route, $slug );
+					if ( $clean['slug'] ) { $clean_routes[ $clean['slug'] ] = $clean; }
+				}
+				$value = $clean_routes;
+				break;
 			case 'awm_emergency_rules':
-				if ( ! is_array( $value ) ) { $value = array(); }
+				$clean_rules = array();
+				foreach ( array_slice( is_array( $value ) ? $value : array(), 0, 50 ) as $rule ) {
+					if ( ! is_array( $rule ) ) { continue; }
+					$clean = awm_emergency_sanitize_rule( $rule );
+					if ( '1' === $clean['enabled'] && empty( $clean['page_paths'] ) && empty( $clean['destinations'] ) && empty( $clean['exact_links'] ) ) {
+						$clean['enabled'] = '0';
+					}
+					$clean_rules[] = $clean;
+				}
+				$value = $clean_rules;
 				break;
 		}
 		update_option( $name, $value, false );
