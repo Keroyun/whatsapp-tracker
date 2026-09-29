@@ -9,6 +9,7 @@ function awm_emergency_rule_defaults() {
 	return array(
 		'id'               => '',
 		'name'             => 'Contact Availability Notice',
+		'analytics_label'  => 'contact_unavailable',
 		'enabled'          => '0',
 		'priority'         => 10,
 		'match_mode'       => 'all',
@@ -169,7 +170,10 @@ function awm_emergency_sanitize_rule( $input ) {
 		}
 	}
 	$primary_action = isset( $input['primary_action'] ) ? sanitize_key( $input['primary_action'] ) : $defaults['primary_action'];
-	if ( ! in_array( $primary_action, array( 'tawk', 'url' ), true ) ) {
+	if ( 'tawk' === $primary_action ) {
+		$primary_action = 'live_chat'; // Backward compatibility.
+	}
+	if ( ! in_array( $primary_action, array( 'live_chat', 'url' ), true ) ) {
 		$primary_action = $defaults['primary_action'];
 	}
 
@@ -188,6 +192,7 @@ function awm_emergency_sanitize_rule( $input ) {
 	return array(
 		'id'              => substr( $id, 0, 64 ),
 		'name'            => sanitize_text_field( awm_emergency_limit_text( $input['name'] ?? $defaults['name'], 191 ) ),
+		'analytics_label' => sanitize_key( awm_emergency_limit_text( $input['analytics_label'] ?? $defaults['analytics_label'], 80 ) ),
 		'enabled'         => ! empty( $input['enabled'] ) ? '1' : '0',
 		'priority'        => max( 0, min( 999, absint( $input['priority'] ?? $defaults['priority'] ) ) ),
 		'match_mode'      => $match_mode,
@@ -230,7 +235,7 @@ function awm_get_active_emergency_rules() {
 		}
 		$active[] = array(
 			'id'              => (string) ( $rule['id'] ?? '' ),
-			'name'            => (string) ( $rule['name'] ?? '' ),
+			'analyticsLabel'  => (string) ( $rule['analytics_label'] ?? 'contact_unavailable' ),
 			'priority'        => (int) ( $rule['priority'] ?? 0 ),
 			'channel'         => (string) ( $rule['channel'] ?? 'whatsapp' ),
 			'language'        => (string) ( $rule['language'] ?? '' ),
@@ -242,7 +247,7 @@ function awm_get_active_emergency_rules() {
 			'title'           => (string) ( $rule['popup_title'] ?? '' ),
 			'message'         => (string) ( $rule['popup_message'] ?? '' ),
 			'primaryLabel'    => (string) ( $rule['primary_label'] ?? '' ),
-			'primaryAction'   => (string) ( $rule['primary_action'] ?? 'url' ),
+			'primaryAction'   => 'tawk' === (string) ( $rule['primary_action'] ?? 'url' ) ? 'live_chat' : (string) ( $rule['primary_action'] ?? 'url' ),
 			'primaryUrl'      => (string) ( $rule['primary_url'] ?? '' ),
 			'secondaryLabel'  => (string) ( $rule['secondary_label'] ?? '' ),
 			'secondaryUrl'    => (string) ( $rule['secondary_url'] ?? '' ),
