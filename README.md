@@ -25,6 +25,9 @@ This plugin manages website contact links only. It does not connect to a WhatsAp
 
 ## Installation
 
+PHP 7.4 or newer is required. For security and performance, use a currently supported PHP release; WordPress currently recommends PHP 8.3 or newer.
+
+
 Download or clone this repository into `wp-content/plugins/whatsapp-tracker`, then activate **WhatsApp Tracker**.
 
 For production releases, install the `whatsapp-tracker.zip` asset attached to a GitHub release when available.
@@ -111,7 +114,7 @@ The updater checks the latest public GitHub release. It prefers a release asset 
 whatsapp-tracker.zip
 ```
 
-If that asset is unavailable, the GitHub release source archive is used and normalized to the `whatsapp-tracker` plugin directory during installation.
+If that asset is unavailable, the plugin does **not** fall back to a GitHub source archive and no update is offered. This keeps development files out of production updates.
 
 ## Security and privacy
 
