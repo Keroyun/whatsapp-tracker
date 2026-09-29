@@ -82,11 +82,7 @@ function awm_migration_decode_value( $serialized ) {
 	if ( ! is_serialized( $serialized ) ) {
 		return $serialized;
 	}
-	if ( PHP_VERSION_ID >= 70000 ) {
-		$value = @unserialize( trim( $serialized ), array( 'allowed_classes' => false ) );
-	} else {
-		$value = maybe_unserialize( $serialized );
-	}
+	$value = @unserialize( trim( $serialized ), array( 'allowed_classes' => false ) );
 	if ( ! awm_migration_value_is_supported( $value ) ) {
 		return new WP_Error( 'awm_unsafe_migration_value', 'Stored backup contains an unsupported object/resource and was not written.' );
 	}
