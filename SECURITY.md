@@ -2,19 +2,44 @@
 
 ## Reporting
 
-Do not put secrets, private messages, production numbers, database exports or unredacted logs into public issues or pull requests. Contact the maintainer through the contact method published at [khairulazhar.com](https://khairulazhar.com) to arrange a private report. Use GitHub private vulnerability reporting if it is available for this repository.
+Do not publish credentials, private messages, production contact data, database exports or unredacted logs in issues. Use GitHub private vulnerability reporting when available, or contact the maintainer through [khairulazhar.com](https://khairulazhar.com).
 
-## Boundaries
+## Administrative boundaries
 
-- Administrative settings, scans, exports and migrations require WordPress administrative capabilities and use WordPress nonce checks for state-changing requests.
-- Public tracking uses origin, payload/content-type and rate-limit checks. These reduce abuse but are not proof that a human clicked a link.
-- Public notice configuration is intentionally readable by visitors. Contact destinations and notice actions must not contain secrets or credential-bearing URLs.
-- The form endpoint executes an administrator-saved shortcode for an active configured rule; visitors cannot submit arbitrary shortcode source. The provider remains responsible for form security, data processing and consent.
-- Shortlink resolution is administrator-triggered and bounded. Third-party chat/form plugins, server logging and downstream analytics have their own privacy behavior.
-- Inventory URLs may contain prefilled text. Migration backups may contain private post content and metadata. Keep site databases, backups and exports outside Git.
+- Management screens use the dedicated `manage_whatsapp_tracker` capability.
+- Administrators always retain that capability; selected roles may be granted it without receiving full `manage_options` access.
+- State-changing operations use WordPress nonces.
+- Portable configuration import is capability-protected, nonce-protected, limited to 1 MB and re-sanitized through production validators.
 
-## Public-source preparation
+## Public tracking
 
-The initial public tree excludes production captures, local test infrastructure, dependency directories, caches, release ZIPs, media, historical deployment notes and database data. Regression fixtures and UI examples were replaced with fictional-number examples. The only personal attribution intentionally retained is the author name and the author's explicitly requested public website/GitHub links.
+- The tracking endpoint validates request origin, content type and payload size and applies a bounded rate limit.
+- Raw visitor IP addresses and user agents are used only to derive a keyed rate-limit identifier; they are not stored in analytics tables.
+- Click analytics are aggregated.
+- Telephone click events are dataLayer-only unless another analytics system records them.
 
-Source scanning is not a guarantee that all vulnerabilities have been found. Review every future commit and its history before publishing; ignoring a file does not remove it from an existing commit. If a credential is ever exposed, revoke/rotate it promptly and coordinate removal of the exposed material.
+## Public notice configuration
+
+Active notice targeting and contact destinations must be available to the visitor's browser to perform matching. Do not treat them as secrets.
+
+Internal administrator rule names are not included in public notice configuration. A separate sanitized analytics label is exposed for frontend events.
+
+## External integrations
+
+- Tawk.to support is optional and provider-neutral at the rule level; WhatsApp Tracker does not install or inject the Tawk widget.
+- Shortcode form providers remain responsible for form validation, storage, consent, CAPTCHA and downstream processing.
+- GitHub release checks make bounded HTTPS requests to the public GitHub API and cache the response.
+
+## Scanning and migration
+
+- Quick and Recent Changes scans inspect WordPress content.
+- Deep Scan performs bounded loopback HTTP requests and remains manual.
+- Scheduled Recent Changes is optional, lightweight, and stops for manual review when more than 100 content changes are pending.
+- Inventory URLs may contain prefilled WhatsApp text.
+- Migration backups may contain original page content and metadata. Protect database backups accordingly.
+
+## Data removal
+
+Deactivation does not delete plugin data. Uninstall removes plugin capabilities and scheduled tasks. Stored plugin data is deleted only when the administrator explicitly enables the uninstall deletion setting.
+
+Source review and automated tests reduce risk but do not constitute a penetration-test certification.
