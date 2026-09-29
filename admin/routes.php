@@ -120,7 +120,7 @@ function awm_managed_routes_page() {
 	$edit    = isset( $_GET['edit'] ) ? awm_managed_route_slug( wp_unslash( $_GET['edit'] ) ) : '';
 	$route   = $edit && isset( $routes[ $edit ] ) ? array_merge( awm_managed_route_defaults(), $routes[ $edit ] ) : awm_managed_route_defaults();
 	$route['messages'] = awm_managed_route_messages( $route );
-	$languages = awm_available_languages();
+	$languages = array_values( array_unique( array_merge( awm_available_languages(), array_keys( $route['messages'] ) ) ) );
 	$default_language = awm_default_language();
 	$is_edit = (bool) ( $edit && isset( $routes[ $edit ] ) );
 	$notice  = isset( $_GET['awm_notice'] ) ? sanitize_key( wp_unslash( $_GET['awm_notice'] ) ) : '';
