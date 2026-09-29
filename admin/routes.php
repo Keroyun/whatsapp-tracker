@@ -16,7 +16,7 @@ function awm_routes_redirect( $notice, $slug = '' ) {
 
 add_action( 'admin_post_awm_save_managed_route', 'awm_save_managed_route' );
 function awm_save_managed_route() {
-	if ( ! current_user_can( 'manage_options' ) ) {
+	if ( ! current_user_can( AWM_CAPABILITY ) ) {
 		wp_die( 'Insufficient permissions.' );
 	}
 	check_admin_referer( 'awm_save_managed_route' );
@@ -45,7 +45,7 @@ function awm_save_managed_route() {
 
 add_action( 'admin_post_awm_toggle_managed_route', 'awm_toggle_managed_route' );
 function awm_toggle_managed_route() {
-	if ( ! current_user_can( 'manage_options' ) ) {
+	if ( ! current_user_can( AWM_CAPABILITY ) ) {
 		wp_die( 'Insufficient permissions.' );
 	}
 	check_admin_referer( 'awm_toggle_managed_route' );
@@ -68,7 +68,7 @@ function awm_toggle_managed_route() {
 
 add_action( 'admin_post_awm_switch_managed_route', 'awm_switch_managed_route' );
 function awm_switch_managed_route() {
-	if ( ! current_user_can( 'manage_options' ) ) {
+	if ( ! current_user_can( AWM_CAPABILITY ) ) {
 		wp_die( 'Insufficient permissions.' );
 	}
 	check_admin_referer( 'awm_switch_managed_route' );
@@ -91,7 +91,7 @@ function awm_switch_managed_route() {
 
 add_action( 'admin_post_awm_delete_managed_route', 'awm_delete_managed_route' );
 function awm_delete_managed_route() {
-	if ( ! current_user_can( 'manage_options' ) ) {
+	if ( ! current_user_can( AWM_CAPABILITY ) ) {
 		wp_die( 'Insufficient permissions.' );
 	}
 	check_admin_referer( 'awm_delete_managed_route' );
@@ -113,7 +113,7 @@ function awm_delete_managed_route() {
 }
 
 function awm_managed_routes_page() {
-	if ( ! current_user_can( 'manage_options' ) ) {
+	if ( ! current_user_can( AWM_CAPABILITY ) ) {
 		return;
 	}
 	$routes  = awm_get_managed_routes();
